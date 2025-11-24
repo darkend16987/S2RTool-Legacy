@@ -192,7 +192,8 @@ You are performing high-fidelity inpainting. Adherence to mask and style is HIGH
 
     # ============== PLANNING MODE PROMPTS ==============
 
-    PLANNING_DETAIL_PROMPT = """
+    # DYNAMIC PROMPT CONSTRUCTION IS BETTER THAN STATIC TEMPLATES
+    PLANNING_DETAIL_CORE = """
 **ROLE**: You are an expert AI urban planning visualization specialist.
 
 **CRITICAL CONTEXT**: This is SKETCH-TO-RENDER for detailed planning. The sketch shows EXISTING BUILDINGS already drawn. You must TRANSFORM the sketch into photorealistic render while PRESERVING shapes, proportions, and layout precisely.
@@ -205,127 +206,40 @@ You are performing high-fidelity inpainting. Adherence to mask and style is HIGH
    ⚠️ This is the MOST CRITICAL requirement!
    ✓ Maintain EXACT building shapes from sketch (±3% tolerance max)
    ✓ Preserve EXACT building-to-building scale ratios
-   ✓ Keep EXACT layout and spatial relationships
    ✓ Respect all lot boundaries and setbacks shown
-   ✓ Maintain building footprints precisely
    ✗ DO NOT alter building shapes to "improve" design
-   ✗ DO NOT change height proportions
    ✗ DO NOT merge or split buildings
-   ✗ DO NOT adjust spacing between buildings
-
-   🚨 **ANTI-HALLUCINATION CRITICAL**:
-   ✗ ABSOLUTELY DO NOT add new buildings to empty spaces in the sketch
-   ✗ DO NOT fill vacant lots with buildings
-   ✗ ONLY render buildings that are CLEARLY DRAWN in the sketch
-   ✓ Empty spaces should become: green areas, plazas, parking, playgrounds, sports fields, gardens
-   ✓ Public amenities in empty spaces: community center, supermarket, playground, sports court, garden
-   ✗ NEVER imagine or create additional high-rise or low-rise buildings not shown in sketch
+   🚨 **ANTI-HALLUCINATION**: ONLY render buildings CLEARLY DRAWN in the sketch. Empty spaces must remain open (parks, plazas).
 
 2. **PLANNING DESCRIPTION**:
    {planning_description}
-   ⚠️ Use this ONLY as context - shapes must match sketch!
 
-3. **CAMERA & COMPOSITION**:
+3. **CAMERA, HORIZON & COMPOSITION**:
    Camera Angle: {camera_angle}
+   **Horizon Line**: {horizon_line}
    Aspect Ratio: {aspect_ratio}
-   ✓ Show entire development clearly
-   ✓ Maintain specified aerial perspective
-   ✓ Clear view of layout relationships
-   ✓ Professional framing and composition
 
 4. **TIME & ATMOSPHERE**:
-   Time of Day: {time_of_day}
+   Time: {time_of_day}
    Weather: {weather}
-   ✓ Apply realistic lighting for specified time
-   ✓ Natural shadows respecting sun angle
-   ✓ Atmospheric effects appropriate to weather
-   ✓ Sky and ambience matching conditions
 
-4.5. **QUALITY MODE**:
+5. **QUALITY & STYLE**:
    {quality_note}
 
-5. **MATERIALS & TEXTURES** (Photorealistic Quality):
-   ⚠️ Note: At planning scale 1:500, maintain overall material quality without micro-details
-
-   Glass Facades:
-   - High reflection (70-80%)
-   - Fresnel Effect: Edges reflect more than center faces
-   - Subtle distortion (real glass is never 100% flat)
-   - Mix clear window glass + opaque spandrel glass (hiding floor slabs)
-   - Variation: Some panels slightly darker/lighter
-   - Interior visibility: Random curtains (some open, some closed, varied colors: white, cream, gray)
-   - Interior lights: {interior_lighting}
-
-   Concrete:
-   - Displacement mapping for texture
-   - Heavy, grounded appearance
-   - Slight weathering/imperfections
-   - Natural color variation
-
-   Wood Cladding:
-   - Natural grain visible
-   - Warm tones
-   - Slight texture variation
-
-   Metal Panels:
-   - High reflectivity (60-70%)
-   - Sharp highlights
-   - Industrial appearance
-
-6. **BUILDING DETAILS** (Scale-appropriate):
-   ✓ Vertical fins/louvers for sun shading (if visible at scale)
-   ✓ Balconies with depth (not flat facades)
-   ✓ Podium slightly wider than tower above (if applicable)
-   {rooftop_details}
-
-7. **RENDER EFFECTS** (Apply based on quality presets):
+6. **RENDER EFFECTS**:
    {render_effects}
 
-8. **URBAN CONTEXT & DETAILS**:
-   ✓ Streets and roads between buildings (grid pattern if applicable)
-   ✓ Main spine road clearly visible
-   ✓ Sidewalks and pathways
-   ✓ Parking areas/layouts (if visible from angle)
-   ✓ Landscaping (varied tree species and sizes)
-   ✓ Green spaces and plazas (central green core if applicable)
-   ✓ Water features (ponds, fountains, mirror pools - ONLY if sketch shows them or description mentions)
-   ✓ People at appropriate scale (small from aerial view, varied activities)
-   ✓ Vehicles with subtle motion blur (sized correctly)
-   ✓ Street furniture (lights, benches, signs at appropriate scale)
+7. **MATERIALS & DETAILS**:
+   {material_details}
 
-9. **PHOTOREALISTIC QUALITY & AERIAL PERSPECTIVE**:
-   ✓ Natural depth of field (slight blur for distance)
-   ✓ Aerial Perspective: Distant buildings slightly desaturated
-   ✓ Atmospheric haze for depth (further objects softer)
-   ✓ Realistic material properties
-   ✓ Accurate light bouncing and shadows
-   ✓ Subtle imperfections for realism
-   ✓ Professional architectural photography feel
-   ✓ Cinematic color grading
+8. **URBAN CONTEXT**:
+   {context_details}
 
-10. **SKETCH ADHERENCE**:
+9. **SKETCH ADHERENCE**:
    Fidelity Level: {sketch_adherence}
-   ⚠️ At 0.90+ fidelity, shape preservation is ABSOLUTE
-   ⚠️ At planning scale, focus on massing, proportions, and layout over micro-details
-   ⚠️ Even at 0.5 fidelity, basic proportions must match
+   ⚠️ At 0.90+ fidelity, shape preservation is ABSOLUTE.
 
-**OUTPUT FORMAT**:
-✓ Single photorealistic aerial rendering
-✓ Aspect ratio: {aspect_ratio}
-✓ Professional architectural visualization quality
-✗ No text labels or annotations
-✗ No watermarks or overlays
-
-**OUTPUT**: Photorealistic planning visualization showing the entire development from {camera_angle} perspective at {time_of_day} with {weather} conditions, all building shapes and proportions precisely matching the source sketch.
-
-**VERIFICATION CHECKLIST**:
-- [ ] All building shapes match sketch precisely
-- [ ] Building-to-building proportions preserved
-- [ ] Layout and spacing unchanged
-- [ ] Materials are photorealistic
-- [ ] Lighting matches time of day
-- [ ] Aerial perspective is clear
-- [ ] Context elements enhance realism
+**OUTPUT**: Photorealistic planning visualization. No text, no watermarks.
 """
 
     PLANNING_RENDER_PROMPT = """
@@ -638,26 +552,14 @@ You are performing high-fidelity inpainting. Adherence to mask and style is HIGH
         camera_angle: str = "match_sketch",
         time_of_day: str = "golden_hour",
         weather: str = "clear",
+        horizon_line: str = "ground_only",
         quality_level: str = "high_fidelity",
         quality_presets: dict = None,
         sketch_adherence: float = 0.90,
         aspect_ratio: str = "16:9"
     ) -> str:
         """
-        Build planning detail render prompt
-
-        Args:
-            planning_description: Overall planning description
-            camera_angle: Aerial perspective
-            time_of_day: Time of day for lighting
-            weather: Weather conditions
-            quality_level: Quality level preset (standard/high_fidelity/ultra_realism)
-            quality_presets: Dict of render quality options (can override quality_level)
-            sketch_adherence: How strictly to follow sketch (0.5-1.0)
-            aspect_ratio: Target aspect ratio
-
-        Returns:
-            Formatted planning detail prompt
+        Build planning detail render prompt using DYNAMIC construction
         """
         # Camera angle descriptions
         camera_angles = {
@@ -686,81 +588,81 @@ You are performing high-fidelity inpainting. Adherence to mask and style is HIGH
             "foggy": "Foggy/misty (reduced visibility, atmospheric depth, soft diffusion)"
         }
 
+        # Horizon line descriptions
+        horizon_line_descriptions = {
+            "ground_only": "⚠️ AERIAL VIEW - NO HORIZON LINE. Focus strictly on ground context. Background fades to atmospheric haze.",
+            "with_horizon": "✓ DISTANT VIEW - WITH HORIZON LINE. Include visible sky and natural horizon transition."
+        }
+
         # Build render effects list based on quality presets
         if quality_presets is None:
             quality_presets = {}
 
         effects_list = []
         if quality_presets.get('global_illumination', True):
-            effects_list.append("✓ Global Illumination (realistic light bouncing, ambient occlusion)")
+            effects_list.append("Global Illumination")
         if quality_presets.get('soft_shadows', True):
-            effects_list.append("✓ Soft Shadows with natural penumbra")
+            effects_list.append("Soft Shadows")
         if quality_presets.get('hdri_sky', True):
-            effects_list.append("✓ HDRI Sky for realistic environment lighting")
+            effects_list.append("HDRI Sky")
         if quality_presets.get('reflections', True):
-            effects_list.append("✓ Accurate Reflections on glass, water, and metal surfaces")
+            effects_list.append("Accurate Reflections")
         if quality_presets.get('depth_of_field', True):
-            effects_list.append("✓ Depth of Field (slight background blur for aerial shots)")
-        if quality_presets.get('bloom', True):
-            effects_list.append("✓ Bloom/Lens Flare on bright surfaces (subtle, realistic)")
-        if quality_presets.get('color_correction', True):
-            effects_list.append("✓ Color Correction (professional grading, cinematic look)")
-        if quality_presets.get('desaturate', True):
-            effects_list.append("✓ Slight desaturation (-5 to -10%) for photorealism")
-
-        render_effects = "\n   ".join(effects_list) if effects_list else "Standard photorealistic rendering"
+            effects_list.append("Depth of Field")
+        
+        render_effects = ", ".join(effects_list) if effects_list else "Standard photorealistic rendering"
 
         camera_desc = camera_angles.get(camera_angle, camera_angles["match_sketch"])
         time_desc = time_descriptions.get(time_of_day, time_descriptions["golden_hour"])
         weather_desc = weather_descriptions.get(weather, weather_descriptions["clear"])
+        horizon_line_desc = horizon_line_descriptions.get(horizon_line, horizon_line_descriptions["ground_only"])
 
-        # Quality level adjustments
+        # Quality level adjustments with PRO RENDER KEYWORDS
         quality_notes = {
-            "standard": "⚡ SPEED MODE: Use basic materials, fewer effects, prioritize render speed. Simplified textures acceptable.",
-            "high_fidelity": "🎯 BALANCED MODE: Full photorealistic materials and effects as specified. Professional architectural visualization quality.",
-            "ultra_realism": "💎 ULTRA MODE: MAXIMUM detail and realism. Enhanced atmospheric effects, micro-variations in materials, professional photography quality. Pay extra attention to all material details, reflections, and subtle environmental effects."
+            "standard": "SPEED MODE: Basic textures, clear lighting.",
+            "high_fidelity": "ARCHITECTURAL VISUALIZATION: Unreal Engine 5 style, V-Ray rendering qualities, sharp details, professional color grading.",
+            "ultra_realism": "AWARD WINNING PHOTOGRAPHY: 8k resolution, highly detailed textures (imperfections, weathering), cinematic lighting, volumetric fog, Octane Render style."
         }
         quality_note = quality_notes.get(quality_level, quality_notes["high_fidelity"])
 
-        # Interior lighting logic based on time of day (enhanced for ultra_realism)
-        if time_of_day in ['evening', 'night']:
-            interior_lighting = "Varied pattern: 60-80% of apartments lit (people are home), random warm glow through windows"
-            if quality_level == "ultra_realism":
-                interior_lighting += ", with visible color temperature variations (2700K-3000K), curtain silhouettes, occasional TV flicker"
-        elif time_of_day in ['golden_hour', 'afternoon']:
-            interior_lighting = "Varied pattern: 20-30% of apartments lit (some early returns), subtle interior glow"
-            if quality_level == "ultra_realism":
-                interior_lighting += ", mix of warm and cool lights, realistic dimming variations"
-        else:  # morning, midday
-            interior_lighting = "Minimal interior lights (daytime), mostly natural light, few apartments lit"
-            if quality_level == "ultra_realism":
-                interior_lighting += ", with strong interior-exterior light contrast visible through glass"
-
-        # Rooftop details logic based on camera angle (enhanced for ultra_realism)
+        # Construct Material Details based on keywords in description to save tokens
+        # If description mentions "glass", add glass details, etc.
+        material_details_list = []
+        desc_lower = planning_description.lower()
+        
+        if "kính" in desc_lower or "glass" in desc_lower:
+            material_details_list.append("Glass: High reflection, Fresnel effect, subtle distortion, varied panel opacity.")
+        if "bê tông" in desc_lower or "concrete" in desc_lower:
+            material_details_list.append("Concrete: Texture displacement, slight weathering, matte finish.")
+        if "gỗ" in desc_lower or "wood" in desc_lower:
+            material_details_list.append("Wood: Natural grain, warm tones.")
+        
+        # Rooftop logic
         aerial_angles = ['drone_45deg', 'birds_eye', 'drone_30deg']
         if camera_angle in aerial_angles or camera_angle == 'match_sketch':
-            rooftop_details = """✓ Rooftop Details (CRITICAL for aerial views):
-   - Elevator shaft housing/tum thang máy
-   - Water tanks and HVAC/chiller units
-   - Safety railings and access stairs
-   - Lightning rods
-   - Maintenance equipment/service areas
-   - ⚠️ Rooftops MUST NOT be empty flat surfaces - these are functional spaces"""
-            if quality_level == "ultra_realism":
-                rooftop_details += "\n   - ULTRA: Add weathering, maintenance access paths, cable runs, subtle rust/patina on metal elements"
-        else:
-            rooftop_details = "✓ Rooftop elements visible if angle permits (not priority for street-level views)"
+            material_details_list.append("Rooftops: Functional spaces with HVAC units, elevator shafts, not empty flat surfaces.")
+            
+        material_details = "\n   ".join(material_details_list) if material_details_list else "Use high-quality architectural materials appropriate for the building types."
 
-        # Format prompt
-        prompt = cls.PLANNING_DETAIL_PROMPT.format(
+        # Context details
+        context_list = [
+            "Roads: Asphalt texture, lane markings",
+            "Sidewalks: Paved, pedestrian scale",
+            "Vegetation: Varied tree sizes, green zones"
+        ]
+        context_details = "\n   ".join(context_list)
+
+        # Format prompt using CORE template
+        prompt = cls.PLANNING_DETAIL_CORE.format(
             planning_description=planning_description,
             camera_angle=camera_desc,
+            horizon_line=horizon_line_desc,
             time_of_day=time_desc,
             weather=weather_desc,
             quality_note=quality_note,
-            interior_lighting=interior_lighting,
-            rooftop_details=rooftop_details,
             render_effects=render_effects,
+            material_details=material_details,
+            context_details=context_details,
             sketch_adherence=f"{sketch_adherence:.2f}",
             aspect_ratio=aspect_ratio
         )

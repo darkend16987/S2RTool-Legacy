@@ -1,15 +1,55 @@
 // ============================================
 // S2R TOOL - Planning Mode JavaScript
-// Version: 3.2
+// Version: 3.4 - FULL ROBUST VERSION
+// Updated: Docker Compatible & Safe DOM
 // ============================================
 
 // ============== CONFIG ==============
-const API_BASE_URL = 'http://localhost:5001/api';
+const API_BASE_URL = '/api';
 
 // ============== STATE ==============
 let currentSitePlanImage = null;
 let currentLotMapImage = null;
 let isPlanningRendering = false;
+
+// ============== DOM ELEMENTS (Global Variables) ==============
+// Sẽ được gán trong DOMContentLoaded
+let sitePlanInput, lotMapInput, addLotBtn, generateBtn, regenerateBtn, gallery, outputControls;
+
+// ============== INIT ==============
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Planning Mode initialized');
+
+    // 1. Initialize Elements
+    sitePlanInput = document.getElementById('uploadSitePlan');
+    lotMapInput = document.getElementById('uploadLotMap');
+    addLotBtn = document.getElementById('addLotBtn');
+    generateBtn = document.getElementById('generatePlanningBtn');
+    regenerateBtn = document.getElementById('regeneratePlanningBtn');
+    gallery = document.getElementById('planningGallery');
+    outputControls = document.getElementById('planningOutputControls');
+
+    // 2. Setup Listeners
+    if (sitePlanInput) sitePlanInput.addEventListener('change', handleSitePlanUpload);
+    if (lotMapInput) lotMapInput.addEventListener('change', handleLotMapUpload);
+    if (addLotBtn) addLotBtn.addEventListener('click', addLotDescription);
+    if (generateBtn) generateBtn.addEventListener('click', generatePlanningRender);
+    if (regenerateBtn) regenerateBtn.addEventListener('click', generatePlanningRender);
+
+    // 3. Setup Download Listener (Delegation)
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('#downloadPlanningBtn')) {
+            // Lấy base64 từ ảnh đang hiển thị
+            const img = gallery ? gallery.querySelector('img') : null;
+            if (img && img.src.startsWith('data:')) {
+                const base64 = img.src.split(',')[1];
+                downloadPlanningImage(base64);
+            }
+        }
+    });
+
+    console.log('✅ Planning Mode setup complete');
+});
 
 // ============== IMAGE OPTIMIZATION ==============
 async function optimizeImageForUpload(file) {
@@ -25,10 +65,7 @@ async function optimizeImageForUpload(file) {
                 const ratio = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
                 width = Math.round(width * ratio);
                 height = Math.round(height * ratio);
-
                 console.log(`📐 Resizing image: ${img.width}×${img.height} → ${width}×${height}`);
-            } else {
-                console.log(`📐 Image already optimal: ${width}×${height}`);
             }
 
             canvas.width = width;
@@ -45,42 +82,7 @@ async function optimizeImageForUpload(file) {
     });
 }
 
-// ============== HELPER FUNCTIONS ==============
-function showError(id, message) {
-    const errorDiv = document.getElementById(id);
-    if (errorDiv) {
-        errorDiv.textContent = message;
-        errorDiv.classList.remove('hidden');
-    }
-}
-
-function hideError(id) {
-    const errorDiv = document.getElementById(id);
-    if (errorDiv) {
-        errorDiv.classList.add('hidden');
-    }
-}
-
-function showSuccess(id, message) {
-    const successDiv = document.getElementById(id);
-    if (successDiv) {
-        successDiv.textContent = message;
-        successDiv.classList.remove('hidden');
-
-        setTimeout(() => {
-            successDiv.classList.add('hidden');
-        }, 4000);
-    }
-}
-
-function hideSuccess(id) {
-    const successDiv = document.getElementById(id);
-    if (successDiv) {
-        successDiv.classList.add('hidden');
-    }
-}
-
-// ============== PLANNING MODE ==============
+// ============== PLANNING MODE HANDLERS ==============
 
 async function handleSitePlanUpload(event) {
     const file = event.target.files[0];
@@ -88,7 +90,6 @@ async function handleSitePlanUpload(event) {
 
     try {
         console.log('📤 Processing site plan upload...');
-
         const optimizedBlob = await optimizeImageForUpload(file);
 
         const reader = new FileReader();
@@ -98,15 +99,10 @@ async function handleSitePlanUpload(event) {
             const uploaderDiv = document.querySelector('#sitePlanUploader');
             const previewImg = document.getElementById('sitePlanPreview');
 
-            if (uploaderDiv && previewImg) {
-                uploaderDiv.classList.add('has-image');
+            if (uploaderDiv) uploaderDiv.classList.add('has-image');
+            if (previewImg) {
                 previewImg.src = e.target.result;
                 previewImg.classList.remove('hidden');
-
-                const uploadText = uploaderDiv.querySelector('.planning-upload-text');
-                if (uploadText) {
-                    uploadText.textContent = '✅ Đã tải Site Plan';
-                }
             }
 
             updateGenerateButton();
@@ -126,7 +122,6 @@ async function handleLotMapUpload(event) {
 
     try {
         console.log('📤 Processing lot map upload...');
-
         const optimizedBlob = await optimizeImageForUpload(file);
 
         const reader = new FileReader();
@@ -136,21 +131,13 @@ async function handleLotMapUpload(event) {
             const uploaderDiv = document.querySelector('#lotMapUploader');
             const previewImg = document.getElementById('lotMapPreview');
 
-            if (uploaderDiv && previewImg) {
-                uploaderDiv.classList.add('has-image');
+            if (uploaderDiv) uploaderDiv.classList.add('has-image');
+            if (previewImg) {
                 previewImg.src = e.target.result;
                 previewImg.classList.remove('hidden');
-
-                const uploadText = uploaderDiv.querySelector('.planning-upload-text');
-                if (uploadText) {
-                    uploadText.textContent = '✅ Đã tải Lot Map';
-                }
             }
 
-            const addLotBtn = document.getElementById('addLotBtn');
-            if (addLotBtn) {
-                addLotBtn.disabled = false;
-            }
+            if (addLotBtn) addLotBtn.disabled = false;
 
             updateGenerateButton();
             console.log('✅ Lot map uploaded');
@@ -167,11 +154,9 @@ function addLotDescription() {
     const container = document.getElementById('lotCardsContainer');
     if (!container) return;
 
-    // Remove info box if it exists
+    // Xóa thông báo "chưa có lô" nếu có
     const infoBox = container.querySelector('.info-box');
-    if (infoBox) {
-        infoBox.remove();
-    }
+    if (infoBox) infoBox.remove();
 
     const lotNumber = container.children.length + 1;
 
@@ -183,22 +168,11 @@ function addLotDescription() {
         <div class="lot-card-header">
             <label style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
                 <strong>Lô số:</strong>
-                <input type="text"
-                       class="lot-number-input"
-                       value="${lotNumber}"
-                       placeholder="Lô ${lotNumber}">
+                <input type="text" class="lot-number-input" value="${lotNumber}" placeholder="Lô ${lotNumber}">
             </label>
-            <button type="button" class="btn-remove" style="margin: 0;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-            </button>
+            <button type="button" class="btn-remove" style="margin: 0;">×</button>
         </div>
-        <textarea
-            class="lot-description-input"
-            placeholder="Mô tả lô này: công trình, số tầng, vật liệu, màu sắc, đặc điểm..."
-        ></textarea>
+        <textarea class="lot-description-input" placeholder="Mô tả lô này: công trình, số tầng, vật liệu..."></textarea>
     `;
 
     lotCard.querySelector('.btn-remove').addEventListener('click', () => {
@@ -210,13 +184,8 @@ function addLotDescription() {
     lotCard.querySelector('.lot-description-input').addEventListener('input', updateGenerateButton);
 
     container.appendChild(lotCard);
-
     lotCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    lotCard.querySelector('.lot-description-input').focus();
-
     updateGenerateButton();
-
-    console.log(`✅ Added lot description card #${lotNumber}`);
 }
 
 function updateLotNumbers() {
@@ -234,7 +203,6 @@ function updateLotNumbers() {
 }
 
 function updateGenerateButton() {
-    const generateBtn = document.getElementById('generatePlanningBtn');
     if (!generateBtn) return;
 
     const hasSitePlan = currentSitePlanImage !== null;
@@ -267,10 +235,7 @@ function collectLotDescriptions() {
         const description = descriptionInput ? descriptionInput.value.trim() : '';
 
         if (lotNumber && description) {
-            lots.push({
-                lot_number: lotNumber,
-                description: description
-            });
+            lots.push({ lot_number: lotNumber, description: description });
         }
     });
 
@@ -289,42 +254,30 @@ async function generatePlanningRender() {
         return;
     }
 
-    if (isPlanningRendering) {
-        console.warn('⚠️  Planning render already in progress');
-        return;
-    }
+    if (isPlanningRendering) return;
 
     isPlanningRendering = true;
-    const generateBtn = document.getElementById('generatePlanningBtn');
+    if (generateBtn) {
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = '<span class="spinner"></span> Đang render...';
+    }
+    hideError('planningError');
+    hideSuccess('planningSuccess');
 
     try {
         console.log('🎨 Generating planning render...');
 
-        generateBtn.disabled = true;
-        generateBtn.innerHTML = '<span class="spinner"></span> Đang render...';
-        hideError('planningError');
-        hideSuccess('planningSuccess');
-
-        const cameraAngle = document.getElementById('planningCameraAngle').value;
-        const timeOfDay = document.getElementById('planningTimeOfDay').value;
-        const aspectRatio = document.getElementById('planningAspectRatio').value;
-        const styleKeywords = document.getElementById('planningStyleKeywords').value;
+        const getVal = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
 
         const requestData = {
             site_plan_base64: currentSitePlanImage,
             lot_map_base64: currentLotMapImage,
             lot_descriptions: lots,
-            camera_angle: cameraAngle,
-            time_of_day: timeOfDay,
-            aspect_ratio: aspectRatio,
-            style_keywords: styleKeywords
+            camera_angle: getVal('planningCameraAngle'),
+            time_of_day: getVal('planningTimeOfDay'),
+            aspect_ratio: getVal('planningAspectRatio'),
+            style_keywords: getVal('planningStyleKeywords')
         };
-
-        console.log('📝 Planning request:', {
-            lots: lots.length,
-            camera_angle: cameraAngle,
-            time_of_day: timeOfDay
-        });
 
         const response = await fetch(`${API_BASE_URL}/planning/render`, {
             method: 'POST',
@@ -338,52 +291,36 @@ async function generatePlanningRender() {
         }
 
         const result = await response.json();
-
         displayPlanningRender(result.generated_image_base64, result.mime_type);
-
         showSuccess('planningSuccess', '🎉 Planning render hoàn tất!');
-        console.log('✅ Planning render complete');
 
     } catch (error) {
         console.error('❌ Planning render failed:', error);
         showError('planningError', `Lỗi render: ${error.message}`);
     } finally {
-        generateBtn.disabled = false;
-        generateBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <polygon points="10 8 16 12 10 16 10 8"/>
-            </svg>
-            Generate Planning Render
-        `;
+        if (generateBtn) {
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = `Generate Planning Render`;
+        }
         isPlanningRendering = false;
     }
 }
 
 function displayPlanningRender(base64Data, mimeType) {
-    const gallery = document.getElementById('planningGallery');
     if (!gallery) return;
 
     gallery.innerHTML = '';
-
     const img = document.createElement('img');
     img.src = `data:${mimeType};base64,${base64Data}`;
     img.alt = 'Planning render result';
-
+    img.style.width = '100%';
+    img.style.borderRadius = '12px';
     gallery.appendChild(img);
 
-    const downloadBtn = document.getElementById('downloadPlanningBtn');
-    if (downloadBtn) {
-        downloadBtn.classList.remove('hidden');
-        downloadBtn.onclick = () => downloadPlanningImage(base64Data);
-    }
-
-    const controls = document.getElementById('planningOutputControls');
-    if (controls) {
-        controls.classList.remove('hidden');
-    }
-
-    console.log('✅ Planning render displayed');
+    // Hiển thị nút download và controls
+    if (outputControls) outputControls.classList.remove('hidden');
+    const dlBtn = document.getElementById('downloadPlanningBtn');
+    if (dlBtn) dlBtn.classList.remove('hidden');
 }
 
 function downloadPlanningImage(base64Data) {
@@ -392,10 +329,7 @@ function downloadPlanningImage(base64Data) {
         const mimeString = 'image/png';
         const ab = new ArrayBuffer(byteString.length);
         const ia = new Uint8Array(ab);
-
-        for (let i = 0; i < byteString.length; i++) {
-            ia[i] = byteString.charCodeAt(i);
-        }
+        for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
 
         const blob = new Blob([ab], { type: mimeString });
         const url = URL.createObjectURL(blob);
@@ -409,45 +343,27 @@ function downloadPlanningImage(base64Data) {
         URL.revokeObjectURL(url);
 
         showSuccess('planningSuccess', '✅ Ảnh đã được tải xuống!');
-        console.log('✅ Planning image downloaded');
 
     } catch (error) {
         console.error('❌ Download failed:', error);
-        showError('planningError', 'Lỗi khi tải ảnh. Vui lòng thử lại.');
+        showError('planningError', 'Lỗi khi tải ảnh.');
     }
 }
 
-// ============== INIT ==============
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Planning Mode initialized');
-
-    const sitePlanInput = document.getElementById('uploadSitePlan');
-    const lotMapInput = document.getElementById('uploadLotMap');
-    const addLotBtn = document.getElementById('addLotBtn');
-    const generateBtn = document.getElementById('generatePlanningBtn');
-    const regenerateBtn = document.getElementById('regeneratePlanningBtn');
-
-    if (sitePlanInput) {
-        sitePlanInput.addEventListener('change', handleSitePlanUpload);
-    }
-
-    if (lotMapInput) {
-        lotMapInput.addEventListener('change', handleLotMapUpload);
-    }
-
-    if (addLotBtn) {
-        addLotBtn.addEventListener('click', addLotDescription);
-    }
-
-    if (generateBtn) {
-        generateBtn.addEventListener('click', generatePlanningRender);
-    }
-
-    if (regenerateBtn) {
-        regenerateBtn.addEventListener('click', generatePlanningRender);
-    }
-
-    console.log('✅ Planning Mode setup complete');
-});
-
-console.log('📦 Planning script v3.2 loaded successfully! 🎉');
+// UI Helpers
+function showError(id, message) {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = message; el.classList.remove('hidden'); }
+}
+function hideError(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+}
+function showSuccess(id, message) {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = message; el.classList.remove('hidden'); setTimeout(() => el.classList.add('hidden'), 4000); }
+}
+function hideSuccess(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+}

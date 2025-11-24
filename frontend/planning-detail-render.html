@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
 
     <!-- HEADER -->
@@ -21,9 +23,11 @@
 
     <!-- BACK TO HOME -->
     <div style="max-width: 1600px; margin: 0 auto; padding: 1rem 1.5rem;">
-        <a href="index.html" style="display: inline-flex; align-items: center; gap: 0.5rem; color: #2563eb; text-decoration: none; font-weight: 600;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 12H5M12 19l-7-7 7-7"/>
+        <a href="index.html"
+            style="display: inline-flex; align-items: center; gap: 0.5rem; color: #2563eb; text-decoration: none; font-weight: 600;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
             Về trang chủ
         </a>
@@ -45,10 +49,11 @@
             <div id="imageUploader" class="image-uploader">
                 <input type="file" id="uploadSketch" accept="image/*" style="display: none;">
                 <label for="uploadSketch" id="uploadLabel" class="upload-label">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                        <polyline points="17 8 12 3 7 8"/>
-                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
                     </svg>
                     <span class="upload-text">Kéo thả hoặc nhấn để tải ảnh</span>
                     <span class="upload-hint">JPG, PNG • Max 16MB</span>
@@ -80,11 +85,16 @@
             <!-- Analyze Button -->
             <div class="output-actions" style="margin-bottom: 1.5rem;">
                 <button type="button" id="analyzeSketchButton" class="btn-secondary" style="width: 100%;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.35-4.35" />
+                    </svg>
                     <span id="analyzeButtonText">Phân tích Sketch (Analyze)</span>
                     <span id="analyzeSpinner" class="spinner hidden"></span>
                 </button>
-                <small style="color: #64748b; font-size: 0.875rem; display: block; margin-top: 0.5rem; text-align: center;">
+                <small
+                    style="color: #64748b; font-size: 0.875rem; display: block; margin-top: 0.5rem; text-align: center;">
                     💡 Gemini sẽ tự động đọc sketch và điền thông tin vào form bên dưới
                 </small>
             </div>
@@ -94,14 +104,22 @@
                 <!-- Basic Info Section -->
                 <details class="form-section" open>
                     <summary>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
                         Thông tin cơ bản (Basic Info)
                     </summary>
                     <div class="section-content">
                         <!-- Scale -->
                         <div class="form-group">
                             <label for="scale">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                                    <path d="M3 9h18" />
+                                    <path d="M9 21V9" />
+                                </svg>
                                 Tỷ lệ sketch (Scale)
                             </label>
                             <select id="scale">
@@ -115,7 +133,10 @@
                         <!-- Project Type -->
                         <div class="form-group">
                             <label for="project_type">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                                </svg>
                                 Loại công trình
                             </label>
                             <select id="project_type">
@@ -131,10 +152,15 @@
                         <!-- Overall Description -->
                         <div class="form-group">
                             <label for="overall_description">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 20h9" />
+                                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                                </svg>
                                 Tổng quan dự án
                             </label>
-                            <textarea id="overall_description" rows="2" placeholder="Mô tả ngắn gọn tổng thể... (sẽ tự động điền khi Analyze)"></textarea>
+                            <textarea id="overall_description" rows="2"
+                                placeholder="Mô tả ngắn gọn tổng thể... (sẽ tự động điền khi Analyze)"></textarea>
                         </div>
                     </div>
                 </details>
@@ -142,7 +168,10 @@
                 <!-- High-rise Zone Section -->
                 <details class="form-section" open>
                     <summary>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
                         Phân khu cao tầng (High-rise Zone)
                     </summary>
                     <div class="section-content">
@@ -172,7 +201,8 @@
                         </div>
                         <div class="form-group">
                             <label for="highrise_features">Đặc điểm nổi bật</label>
-                            <textarea id="highrise_features" rows="2" placeholder="VD: Lam chắn nắng, ban công, rooftop VRV..."></textarea>
+                            <textarea id="highrise_features" rows="2"
+                                placeholder="VD: Lam chắn nắng, ban công, rooftop VRV..."></textarea>
                         </div>
                     </div>
                 </details>
@@ -180,11 +210,15 @@
                 <!-- Low-rise Zone Section -->
                 <details class="form-section">
                     <summary>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
                         Phân khu thấp tầng (Low-rise Zone)
                     </summary>
                     <div class="section-content">
-                        <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; cursor: pointer;">
+                        <label
+                            style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; cursor: pointer;">
                             <input type="checkbox" id="has_lowrise" style="width: 18px; height: 18px;">
                             <span>Có phân khu thấp tầng</span>
                         </label>
@@ -213,13 +247,17 @@
                 <!-- Landscape Section -->
                 <details class="form-section" open>
                     <summary>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
                         Cảnh quan & Không gian công cộng
                     </summary>
                     <div class="section-content">
                         <div class="form-group">
                             <label for="green_spaces">Không gian xanh & Tiện ích</label>
-                            <textarea id="green_spaces" rows="2" placeholder="VD: Công viên, sân chơi, BBQ, trường học..."></textarea>
+                            <textarea id="green_spaces" rows="2"
+                                placeholder="VD: Công viên, sân chơi, BBQ, trường học..."></textarea>
                         </div>
                         <div class="form-group">
                             <label for="tree_type">Loại cây xanh</label>
@@ -243,15 +281,18 @@
                             <label style="display: block; margin-bottom: 0.5rem;">Context & Activities</label>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
                                 <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                    <input type="checkbox" id="context_people" checked style="width: 18px; height: 18px;">
+                                    <input type="checkbox" id="context_people" checked
+                                        style="width: 18px; height: 18px;">
                                     <span>Người đi bộ</span>
                                 </label>
                                 <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                    <input type="checkbox" id="context_vehicles" checked style="width: 18px; height: 18px;">
+                                    <input type="checkbox" id="context_vehicles" checked
+                                        style="width: 18px; height: 18px;">
                                     <span>Xe hơi</span>
                                 </label>
                                 <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                    <input type="checkbox" id="context_skyline" checked style="width: 18px; height: 18px;">
+                                    <input type="checkbox" id="context_skyline" checked
+                                        style="width: 18px; height: 18px;">
                                     <span>City skyline xa</span>
                                 </label>
                                 <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
@@ -266,7 +307,10 @@
                 <!-- Custom Override -->
                 <details class="form-section">
                     <summary>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
                         Mô tả tùy chỉnh (Custom Override)
                     </summary>
                     <div class="section-content">
@@ -274,7 +318,8 @@
                             <label for="custom_description">
                                 Mô tả tự do (ghi đè các trường trên)
                             </label>
-                            <textarea id="custom_description" rows="4" placeholder="Dùng khi muốn kiểm soát hoàn toàn..."></textarea>
+                            <textarea id="custom_description" rows="4"
+                                placeholder="Dùng khi muốn kiểm soát hoàn toàn..."></textarea>
                             <small style="color: #f59e0b; font-size: 0.875rem; display: block; margin-top: 0.25rem;">
                                 ⚠️ Nếu điền, hệ thống sẽ ưu tiên dùng mô tả này thay vì build từ structured fields
                             </small>
@@ -285,11 +330,16 @@
                 <!-- Camera Angle -->
                 <div class="form-group">
                     <label for="camera_angle">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg>
                         Góc nhìn (Camera Angle)
                     </label>
                     <select id="camera_angle">
-                        <option value="match_sketch" selected>Giống góc sketch (Mặc định) - Bảo toàn góc nhìn gốc</option>
+                        <option value="match_sketch" selected>Giống góc sketch (Mặc định) - Bảo toàn góc nhìn gốc
+                        </option>
                         <option value="drone_45deg">Drone 45° - Nhìn chéo từ trên</option>
                         <option value="birds_eye">Bird's Eye (90°) - Nhìn thẳng từ trên</option>
                         <option value="drone_30deg">Drone thấp 30° - Gần mặt đất hơn</option>
@@ -303,7 +353,10 @@
                 <!-- Aspect Ratio -->
                 <div class="form-group">
                     <label for="aspect_ratio">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                        </svg>
                         Tỷ lệ khung hình
                     </label>
                     <select id="aspect_ratio">
@@ -316,16 +369,20 @@
                 <!-- Environment Settings -->
                 <details class="form-section" open>
                     <summary>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
                         Môi trường & Ánh sáng
                     </summary>
                     <div class="section-content">
                         <!-- Time of Day -->
                         <div class="form-group">
                             <label for="time_of_day">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <polyline points="12 6 12 12 16 14"/>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polyline points="12 6 12 12 16 14" />
                                 </svg>
                                 Thời điểm (Time of Day)
                             </label>
@@ -342,8 +399,9 @@
                         <!-- Weather -->
                         <div class="form-group">
                             <label for="weather">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z" />
                                 </svg>
                                 Thời tiết (Weather)
                             </label>
@@ -354,16 +412,39 @@
                                 <option value="foggy">Sương mù nhẹ</option>
                             </select>
                         </div>
+
+                        <!-- Horizon Line (NEW ADDITION) -->
+                        <div class="form-group">
+                            <label for="horizon_line">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="3" y1="12" x2="21" y2="12" />
+                                    <path d="M3 17l3-3 3 3 4-4 4 4 4-4" />
+                                </svg>
+                                Đường chân trời (Horizon Line)
+                            </label>
+                            <select id="horizon_line">
+                                <option value="ground_only" selected>Chỉ bối cảnh mặt đất (No horizon, ground context
+                                    only)</option>
+                                <option value="with_horizon">Có đường chân trời (With horizon line)</option>
+                            </select>
+                            <p class="help-text" style="font-size: 0.75rem; color: #64748b; margin-top: 0.25rem;">
+                                Chọn "Chỉ bối cảnh mặt đất" nếu góc nhìn chụp từ trên cao xuống, chỉ thấy công trình và
+                                mặt đất.
+                                Chọn "Có đường chân trời" nếu góc nhìn chụp từ xa, có thể thấy trời và đường chân trời.
+                            </p>
+                        </div>
                     </div>
                 </details>
 
                 <!-- Quality Level Selector -->
                 <div class="form-group">
                     <label for="quality_level">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-                            <polyline points="2 17 12 22 22 17"/>
-                            <polyline points="2 12 12 17 22 12"/>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                            <polyline points="2 17 12 22 22 17" />
+                            <polyline points="2 12 12 17 22 12" />
                         </svg>
                         Mức độ chất lượng (Quality Level)
                     </label>
@@ -380,7 +461,10 @@
                 <!-- Render Quality Presets -->
                 <details class="form-section" open>
                     <summary>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M9 18l6-6-6-6" />
+                        </svg>
                         Chất lượng Render (Quality Presets)
                     </summary>
                     <div class="section-content">
@@ -401,7 +485,8 @@
                                 <span>HDRI Sky</span>
                             </label>
                             <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                <input type="checkbox" id="quality_reflection" checked style="width: 18px; height: 18px;">
+                                <input type="checkbox" id="quality_reflection" checked
+                                    style="width: 18px; height: 18px;">
                                 <span>Reflections (Glass/Water)</span>
                             </label>
                             <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
@@ -413,11 +498,13 @@
                                 <span>Bloom / Lens Flare</span>
                             </label>
                             <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                <input type="checkbox" id="quality_color_correction" checked style="width: 18px; height: 18px;">
+                                <input type="checkbox" id="quality_color_correction" checked
+                                    style="width: 18px; height: 18px;">
                                 <span>Color Correction</span>
                             </label>
                             <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-                                <input type="checkbox" id="quality_desaturate" checked style="width: 18px; height: 18px;">
+                                <input type="checkbox" id="quality_desaturate" checked
+                                    style="width: 18px; height: 18px;">
                                 <span>-5% Saturation (Realism)</span>
                             </label>
                         </div>
@@ -430,7 +517,8 @@
                         Độ bám sát Sketch:
                         <span id="sketch_adherence_value" class="range-value">0.90</span>
                     </label>
-                    <input type="range" id="sketch_adherence" min="0.5" max="1.0" step="0.01" value="0.90" class="range-slider">
+                    <input type="range" id="sketch_adherence" min="0.5" max="1.0" step="0.01" value="0.90"
+                        class="range-slider">
                     <div class="range-labels">
                         <span>Linh hoạt</span>
                         <span>Chính xác tuyệt đối</span>
@@ -456,7 +544,10 @@
             <div class="output-actions">
                 <button id="generateRenderButton" class="btn-submit">
                     <span id="renderSpinner" class="spinner hidden"></span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                    </svg>
                     Tạo Render
                 </button>
             </div>
@@ -468,10 +559,11 @@
             <!-- Gallery -->
             <div id="gallery" class="gallery">
                 <div class="gallery-placeholder">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                        <circle cx="8.5" cy="8.5" r="1.5"/>
-                        <polyline points="21 15 16 10 5 21"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <polyline points="21 15 16 10 5 21" />
                     </svg>
                     <p>Kết quả render sẽ xuất hiện ở đây</p>
                 </div>
@@ -480,18 +572,20 @@
             <!-- Output Controls -->
             <div id="outputControls" class="output-controls hidden">
                 <button id="downloadImageBtn" class="btn-secondary btn-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                        <polyline points="7 10 12 15 17 10"/>
-                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
                     </svg>
                     Tải về
                 </button>
                 <button id="regenerateBtn" class="btn-secondary btn-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="1 4 1 10 7 10"/>
-                        <polyline points="23 20 23 14 17 14"/>
-                        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <polyline points="1 4 1 10 7 10" />
+                        <polyline points="23 20 23 14 17 14" />
+                        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" />
                     </svg>
                     Tạo lại
                 </button>
@@ -518,4 +612,5 @@
     <!-- JavaScript -->
     <script src="planning-detail-script.js"></script>
 </body>
+
 </html>

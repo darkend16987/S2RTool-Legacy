@@ -213,6 +213,7 @@ def planning_detail_render():
             "camera_angle": "drone_45deg",
             "time_of_day": "golden_hour",
             "weather": "clear",
+            "horizon_line": "ground_only", // NEW PARAMETER
             "quality_presets": {
                 "global_illumination": true,
                 "soft_shadows": true,
@@ -259,6 +260,9 @@ def planning_detail_render():
         camera_angle = planning_data.get('camera_angle', 'match_sketch')
         time_of_day = planning_data.get('time_of_day', 'golden_hour')
         weather = planning_data.get('weather', 'clear')
+        # Extract Horizon Line
+        horizon_line = planning_data.get('horizon_line', 'ground_only')
+        
         quality_level = planning_data.get('quality_level', 'high_fidelity')
         quality_presets = planning_data.get('quality_presets', {})
         sketch_adherence = planning_data.get('sketch_adherence', 0.90)
@@ -270,6 +274,7 @@ def planning_detail_render():
             camera_angle=camera_angle,
             time_of_day=time_of_day,
             weather=weather,
+            horizon_line=horizon_line, # Pass horizon line
             quality_level=quality_level,
             quality_presets=quality_presets,
             sketch_adherence=sketch_adherence,
@@ -280,6 +285,7 @@ def planning_detail_render():
         print(f"   Description: {planning_description[:80]}...")
         print(f"   Camera: {camera_angle}")
         print(f"   Time: {time_of_day}, Weather: {weather}")
+        print(f"   Horizon: {horizon_line}")
         print(f"   Quality Level: {quality_level}")
         print(f"   Adherence: {sketch_adherence}")
         print(f"   Aspect ratio: {aspect_ratio}")
