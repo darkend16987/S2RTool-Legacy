@@ -1,0 +1,23 @@
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Batch files
+*.bat
+
+# Logs
+*.log
+
+# Documentation
+*.md

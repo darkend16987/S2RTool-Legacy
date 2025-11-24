@@ -1,0 +1,11 @@
+# Virtual Environment (tên venv của bạn)
+venv/
+
+# File biến môi trường
+.env
+
+tests2/
+
+# Python cache
+__pycache__/
+*.pyc

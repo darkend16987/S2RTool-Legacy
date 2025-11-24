@@ -1,0 +1,144 @@
+{
+  "version": "1.0",
+  "description": "Reference Images Library - 3-Tier Storage System",
+  "categories": {
+    "modern": {
+      "name": "Modern Architecture",
+      "description": "Contemporary and minimalist designs",
+      "subcategories": {
+        "vietnam": {
+          "name": "Vietnamese Modern",
+          "description": "Modern architecture adapted to Vietnamese context",
+          "images": [
+            {
+              "id": "modern_vn_001",
+              "name": "Hanoi Modern Townhouse",
+              "description": "Contemporary townhouse with clean lines",
+              "tags": ["modern", "vietnam", "townhouse", "minimalist"],
+              "thumbnail_url": "https://placeholder.com/thumb/modern_vn_001.jpg",
+              "cloud_url": "https://placeholder.com/full/modern_vn_001.jpg",
+              "mime_type": "image/jpeg",
+              "metadata": {
+                "style": "modern minimalist",
+                "lighting": "natural daylight",
+                "materials": ["concrete", "glass", "wood"]
+              }
+            },
+            {
+              "id": "modern_vn_002",
+              "name": "Saigon Villa",
+              "description": "Modern villa with tropical elements",
+              "tags": ["modern", "vietnam", "villa", "tropical"],
+              "thumbnail_url": "https://placeholder.com/thumb/modern_vn_002.jpg",
+              "cloud_url": "https://placeholder.com/full/modern_vn_002.jpg",
+              "mime_type": "image/jpeg",
+              "metadata": {
+                "style": "modern tropical",
+                "lighting": "golden hour",
+                "materials": ["stone", "glass", "greenery"]
+              }
+            }
+          ]
+        },
+        "international": {
+          "name": "International Modern",
+          "description": "Global modern architecture styles",
+          "images": [
+            {
+              "id": "modern_intl_001",
+              "name": "Scandinavian Minimalism",
+              "description": "Clean Nordic design",
+              "tags": ["modern", "scandinavian", "minimalist", "nordic"],
+              "thumbnail_url": "https://placeholder.com/thumb/modern_intl_001.jpg",
+              "cloud_url": "https://placeholder.com/full/modern_intl_001.jpg",
+              "mime_type": "image/jpeg",
+              "metadata": {
+                "style": "scandinavian",
+                "lighting": "soft natural light",
+                "materials": ["white concrete", "wood", "glass"]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "traditional": {
+      "name": "Traditional Architecture",
+      "description": "Classical and heritage designs",
+      "subcategories": {
+        "vietnamese": {
+          "name": "Vietnamese Traditional",
+          "description": "Traditional Vietnamese architecture",
+          "images": [
+            {
+              "id": "trad_vn_001",
+              "name": "Vietnamese Tube House",
+              "description": "Traditional narrow townhouse",
+              "tags": ["traditional", "vietnam", "heritage", "tube house"],
+              "thumbnail_url": "https://placeholder.com/thumb/trad_vn_001.jpg",
+              "cloud_url": "https://placeholder.com/full/trad_vn_001.jpg",
+              "mime_type": "image/jpeg",
+              "metadata": {
+                "style": "vietnamese traditional",
+                "lighting": "warm ambient",
+                "materials": ["wood", "tile", "brick"]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "lighting": {
+      "name": "Lighting References",
+      "description": "Various lighting conditions and moods",
+      "subcategories": {
+        "day": {
+          "name": "Daylight",
+          "description": "Natural daylight references",
+          "images": [
+            {
+              "id": "light_day_001",
+              "name": "Golden Hour Facade",
+              "description": "Warm sunset lighting on building",
+              "tags": ["lighting", "golden hour", "sunset", "warm"],
+              "thumbnail_url": "https://placeholder.com/thumb/light_day_001.jpg",
+              "cloud_url": "https://placeholder.com/full/light_day_001.jpg",
+              "mime_type": "image/jpeg",
+              "metadata": {
+                "time": "sunset",
+                "mood": "warm and inviting",
+                "color_temperature": "warm"
+              }
+            }
+          ]
+        },
+        "night": {
+          "name": "Night Lighting",
+          "description": "Artificial lighting at night",
+          "images": [
+            {
+              "id": "light_night_001",
+              "name": "Night Facade Illumination",
+              "description": "Building lit at night",
+              "tags": ["lighting", "night", "artificial", "dramatic"],
+              "thumbnail_url": "https://placeholder.com/thumb/light_night_001.jpg",
+              "cloud_url": "https://placeholder.com/full/light_night_001.jpg",
+              "mime_type": "image/jpeg",
+              "metadata": {
+                "time": "night",
+                "mood": "dramatic",
+                "color_temperature": "cool"
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "metadata": {
+    "total_categories": 3,
+    "total_images": 6,
+    "last_updated": "2025-11-01",
+    "notes": "This is a sample manifest. Replace placeholder URLs with actual image storage."
+  }
+}

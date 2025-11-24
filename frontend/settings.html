@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - S2R Tool</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Settings page styles */
+        .settings-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .settings-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .settings-header h1 {
+            font-size: 2.5rem;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .settings-header p {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        .settings-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .settings-section h2 {
+            font-size: 1.5rem;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .settings-section h2::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin-right: 0.75rem;
+            vertical-align: middle;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group .help-text {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="password"],
+        .form-group input[type="number"],
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .api-key-input {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .api-key-input input {
+            flex: 1;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #f8f9ff;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-test {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-test:hover {
+            background: #059669;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .status-badge.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-badge.warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .model-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .model-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            transition: border-color 0.2s;
+        }
+
+        .model-card:hover {
+            border-color: #667eea;
+        }
+
+        .model-card h3 {
+            font-size: 1rem;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+        }
+
+        .model-description {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .alert {
+            padding: 1rem 1.25rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .temperature-slider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .temperature-slider input[type="range"] {
+            flex: 1;
+        }
+
+        .temperature-value {
+            min-width: 50px;
+            text-align: center;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid #e2e8f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="settings-container">
+        <a href="index.html" class="back-link">← Về trang chủ</a>
+
+        <div class="settings-header">
+            <h1>⚙️ Cài đặt hệ thống</h1>
+            <p>Cấu hình API key và model Gemini cho S2RTool</p>
+        </div>
+
+        <!-- Alert messages -->
+        <div id="alertContainer"></div>
+
+        <!-- API Key Section -->
+        <div class="settings-section">
+            <h2>🔑 Gemini API Key</h2>
+
+            <div class="form-group">
+                <label>
+                    API Key
+                    <span id="apiKeyStatus"></span>
+                </label>
+                <div class="api-key-input">
+                    <input
+                        type="password"
+                        id="apiKeyInput"
+                        placeholder="AIzaSy..."
+                        autocomplete="off"
+                    >
+                    <button type="button" class="btn btn-test" id="testApiKeyBtn">
+                        Test Key
+                    </button>
+                </div>
+                <p class="help-text">
+                    Nhập Gemini API key của bạn.
+                    <a href="https://makersuite.google.com/app/apikey" target="_blank">Lấy API key tại đây</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Model Selection Section -->
+        <div class="settings-section">
+            <h2>🤖 Model Selection</h2>
+
+            <div class="model-grid">
+                <!-- Building Analysis Model -->
+                <div class="model-card">
+                    <h3>Building Analysis</h3>
+                    <p class="model-description">
+                        Model dùng để phân tích sketch công trình (tiếng Việt)
+                    </p>
+                    <select id="modelBuildingAnalysis" class="form-control">
+                        <!-- Populated by JavaScript -->
+                    </select>
+                </div>
+
+                <!-- Planning Analysis Model -->
+                <div class="model-card">
+                    <h3>Planning Analysis</h3>
+                    <p class="model-description">
+                        Model dùng để phân tích sketch quy hoạch (tiếng Việt)
+                    </p>
+                    <select id="modelPlanningAnalysis" class="form-control">
+                        <!-- Populated by JavaScript -->
+                    </select>
+                </div>
+
+                <!-- Translation Model -->
+                <div class="model-card">
+                    <h3>Translation</h3>
+                    <p class="model-description">
+                        Model dùng để dịch Vietnamese → English
+                    </p>
+                    <select id="modelTranslation" class="form-control">
+                        <!-- Populated by JavaScript -->
+                    </select>
+                </div>
+
+                <!-- Image Generation Model -->
+                <div class="model-card">
+                    <h3>Image Generation</h3>
+                    <p class="model-description">
+                        Model dùng để tạo ảnh render (tất cả modes)
+                    </p>
+                    <select id="modelImageGeneration" class="form-control">
+                        <!-- Populated by JavaScript -->
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Temperature Settings -->
+        <div class="settings-section">
+            <h2>🌡️ Temperature Settings</h2>
+            <p class="help-text" style="margin-bottom: 1.5rem;">
+                Temperature kiểm soát độ "creative" của AI. Thấp hơn = consistent hơn, cao hơn = creative hơn.
+            </p>
+
+            <div class="model-grid">
+                <!-- Building Analysis Temperature -->
+                <div class="form-group">
+                    <label>Building Analysis Temperature</label>
+                    <div class="temperature-slider">
+                        <input
+                            type="range"
+                            id="tempBuildingAnalysis"
+                            min="0"
+                            max="1"
+                            step="0.1"
+                            value="0.3"
+                        >
+                        <span class="temperature-value" id="tempBuildingAnalysisValue">0.3</span>
+                    </div>
+                    <p class="help-text">Khuyến nghị: 0.2-0.4 (factual analysis)</p>
+                </div>
+
+                <!-- Planning Analysis Temperature -->
+                <div class="form-group">
+                    <label>Planning Analysis Temperature</label>
+                    <div class="temperature-slider">
+                        <input
+                            type="range"
+                            id="tempPlanningAnalysis"
+                            min="0"
+                            max="1"
+                            step="0.1"
+                            value="0.2"
+                        >
+                        <span class="temperature-value" id="tempPlanningAnalysisValue">0.2</span>
+                    </div>
+                    <p class="help-text">Khuyến nghị: 0.1-0.3</p>
+                </div>
+
+                <!-- Translation Temperature -->
+                <div class="form-group">
+                    <label>Translation Temperature</label>
+                    <div class="temperature-slider">
+                        <input
+                            type="range"
+                            id="tempTranslation"
+                            min="0"
+                            max="1"
+                            step="0.1"
+                            value="0.4"
+                        >
+                        <span class="temperature-value" id="tempTranslationValue">0.4</span>
+                    </div>
+                    <p class="help-text">Khuyến nghị: 0.3-0.5 (balanced)</p>
+                </div>
+
+                <!-- Image Generation Temperature -->
+                <div class="form-group">
+                    <label>Image Generation Temperature</label>
+                    <div class="temperature-slider">
+                        <input
+                            type="range"
+                            id="tempImageGeneration"
+                            min="0"
+                            max="1"
+                            step="0.1"
+                            value="0.4"
+                        >
+                        <span class="temperature-value" id="tempImageGenerationValue">0.4</span>
+                    </div>
+                    <p class="help-text">Khuyến nghị: 0.3-0.5</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preferences Section -->
+        <div class="settings-section">
+            <h2>⭐ Preferences</h2>
+
+            <div class="model-grid">
+                <div class="form-group">
+                    <label>Default Aspect Ratio</label>
+                    <select id="prefAspectRatio">
+                        <option value="1:1">1:1 - Square (2048x2048)</option>
+                        <option value="3:4">3:4 - Portrait (1536x2048)</option>
+                        <option value="4:3">4:3 - Landscape (2048x1536)</option>
+                        <option value="9:16">9:16 - Tall (1152x2048)</option>
+                        <option value="16:9">16:9 - Wide (2048x1152)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Default Camera Angle</label>
+                    <select id="prefCameraAngle">
+                        <option value="match_sketch">Match Sketch (Mặc định)</option>
+                        <option value="main_facade">Main Facade</option>
+                        <option value="three_quarter">Three Quarter View</option>
+                        <option value="aerial_angle">Aerial View</option>
+                        <option value="low_angle">Low Angle</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Default Time of Day</label>
+                    <select id="prefTimeOfDay">
+                        <option value="golden_hour">Golden Hour</option>
+                        <option value="day">Day</option>
+                        <option value="blue_hour">Blue Hour</option>
+                        <option value="night">Night</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Default Quality Level</label>
+                    <select id="prefQualityLevel">
+                        <option value="standard">Standard</option>
+                        <option value="high_fidelity">High Fidelity</option>
+                        <option value="ultra_realism">Ultra Realism</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button type="button" class="btn btn-danger" id="resetBtn">
+                Reset to Defaults
+            </button>
+            <button type="button" class="btn btn-primary" id="saveBtn">
+                💾 Save Settings
+            </button>
+        </div>
+    </div>
+
+    <script src="settings.js"></script>
+</body>
+</html>

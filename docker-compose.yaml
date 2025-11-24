@@ -1,0 +1,56 @@
+services:
+  # Backend service (Flask API)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: s2rtool-backend
+    ports:
+      - "5001:5001"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - PORT=5001
+      - HOST=0.0.0.0
+    env_file:
+      - .env
+    volumes:
+      # Mount backend code for development (optional - comment out for production)
+      - ./backend:/app
+      # Persist reference images
+      - backend-references:/app/references
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5001/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - s2rtool-network
+
+  # Frontend service (Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: s2rtool-frontend
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - s2rtool-network
+
+networks:
+  s2rtool-network:
+    driver: bridge
+
+volumes:
+  backend-references:
+    driver: local

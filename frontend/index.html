@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S2R Tool - Sketch to Render</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Landing page specific styles */
+        .landing-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .landing-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 4rem;
+        }
+
+        .landing-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .landing-subtitle {
+            font-size: 1.25rem;
+            opacity: 0.95;
+            font-weight: 500;
+        }
+
+        .mode-cards-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1600px;
+            width: 100%;
+        }
+
+        .landing-mode-card {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .landing-mode-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .landing-mode-icon {
+            font-size: 5rem;
+            line-height: 1;
+        }
+
+        .landing-mode-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .landing-mode-description {
+            font-size: 1rem;
+            color: #64748b;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .landing-mode-features {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0 0 0;
+            text-align: left;
+        }
+
+        .landing-mode-features li {
+            font-size: 0.875rem;
+            color: #475569;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .landing-mode-features li:last-child {
+            border-bottom: none;
+        }
+
+        .landing-mode-features li::before {
+            content: "✓";
+            color: #059669;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .landing-footer {
+            margin-top: 4rem;
+            text-align: center;
+            color: white;
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 1200px) {
+            .mode-cards-container {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .landing-title {
+                font-size: 2rem;
+            }
+
+            .landing-mode-card {
+                padding: 2rem;
+            }
+
+            .landing-mode-icon {
+                font-size: 3.5rem;
+            }
+
+            .landing-mode-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="landing-container">
+        <div class="landing-header">
+            <h1 class="landing-title">🏗️ S2R Tool</h1>
+            <p class="landing-subtitle">Chuyển đổi sketch thành render photorealistic với AI</p>
+        </div>
+
+        <div class="mode-cards-container">
+            <!-- Building Render Mode -->
+            <a href="building-render.html" class="landing-mode-card">
+                <div class="landing-mode-icon">🏢</div>
+                <h2 class="landing-mode-title">Building Render</h2>
+                <p class="landing-mode-description">
+                    Render công trình đơn lẻ với chi tiết cao và độ chính xác về cấu trúc
+                </p>
+                <ul class="landing-mode-features">
+                    <li>Phân tích sketch tự động với AI</li>
+                    <li>Đa góc nhìn (facade, 3/4, aerial)</li>
+                    <li>Thư viện reference image</li>
+                    <li>Chỉnh sửa vùng với inpainting</li>
+                    <li>Bảo toàn structure 95%+</li>
+                </ul>
+            </a>
+
+            <!-- Planning Render Mode -->
+            <a href="planning-render.html" class="landing-mode-card">
+                <div class="landing-mode-icon">🏙️</div>
+                <h2 class="landing-mode-title">Planning Render</h2>
+                <p class="landing-mode-description">
+                    Render quy hoạch tổng thể, nhiều lô đất với góc nhìn từ trên cao
+                </p>
+                <ul class="landing-mode-features">
+                    <li>Upload mặt bằng phân lô</li>
+                    <li>Mô tả từng lô riêng biệt</li>
+                    <li>Góc nhìn aerial (drone, bird's eye)</li>
+                    <li>Thời gian trong ngày tùy chỉnh</li>
+                    <li>Bảo toàn lot boundaries 95%+</li>
+                </ul>
+            </a>
+
+            <!-- ✅ NEW: Planning Detail Render Mode -->
+            <a href="planning-detail-render.html" class="landing-mode-card">
+                <div class="landing-mode-icon">🌆</div>
+                <h2 class="landing-mode-title">Planning Detail Render</h2>
+                <p class="landing-mode-description">
+                    Render quy hoạch chi tiết từ sketch có sẵn công trình, tập trung vào hình thái tổng thể
+                </p>
+                <ul class="landing-mode-features">
+                    <li>Upload sketch quy hoạch (có công trình)</li>
+                    <li>Bảo toàn shape và tỷ lệ công trình</li>
+                    <li>Góc nhìn birdview/drone 45°</li>
+                    <li>Render quality presets (GI, shadows, reflections)</li>
+                    <li>Focus: Hình thái, layout, không gian xanh</li>
+                </ul>
+            </a>
+        </div>
+
+        <div class="landing-footer">
+            <p><strong>Powered by Gemini AI</strong> | Version 3.2</p>
+            <p>© 2025 S2R Tool - Architectural Visualization</p>
+            <p style="margin-top: 1rem;">
+                <a href="settings.html" style="color: white; text-decoration: underline;">
+                    ⚙️ Cài đặt hệ thống
+                </a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
