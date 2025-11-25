@@ -1,9 +1,8 @@
 """
 core/gemini_client.py - Gemini API Client Wrapper
 Uses BOTH old (generativeai) and new (genai) APIs
-✅ FIX: Syntax error in Regex
-✅ FIX: Robust JSON parsing
-✅ FIX: Added retry logic with exponential backoff
+✅ FIX: Chuyển Config sang Dictionary để fix lỗi "Extra inputs forbidden"
+✅ FIX: Hỗ trợ render ảnh 2K (2048x2048)
 """
 
 import json
@@ -117,7 +116,7 @@ class GeminiClient:
             try:
                 return json.loads(response_text)
             except json.JSONDecodeError as e:
-                print(f"❌ JSON Parse Error. Raw text: {response_text[:100]}...") # Log raw text for debug
+                print(f"❌ JSON Parse Error. Raw text: {response_text[:100]}...")
                 raise ValueError(f"Invalid JSON from Gemini: {str(e)}")
 
         return self._retry_with_backoff(_generate)
@@ -133,11 +132,9 @@ class GeminiClient:
         """
         Generate image using NEW API (google-genai)
         """
-        # 1. Check Library
         if not HAS_NEW_API:
             raise ImportError("Library 'google-genai' not installed. Add to requirements.txt")
 
-        # 2. Check Client
         if not self.client_new:
             raise ValueError("Gemini Client (New API) not initialized.")
 
@@ -146,13 +143,13 @@ class GeminiClient:
             
             parts = []
             
-            # Handle Source Image (for variations/editing contexts)
+            # Handle Source Image
             if source_image:
                 img_byte_arr = io.BytesIO()
                 source_image.save(img_byte_arr, format='PNG')
                 parts.append(types_new.Part.from_bytes(data=img_byte_arr.getvalue(), mime_type="image/png"))
             
-            # Handle Reference Image (ControlNet-like behavior depending on prompt)
+            # Handle Reference Image
             if reference_image:
                 img_byte_arr = io.BytesIO()
                 reference_image.save(img_byte_arr, format='PNG')
@@ -162,52 +159,50 @@ class GeminiClient:
 
             contents = [types_new.Content(role="user", parts=parts)]
 
-            # ✅ OPTIMIZED: Configure for maximum image quality (2K resolution)
-            # Based on AI Studio reference code for gemini-3-pro-image-preview
-            generate_content_config = types_new.GenerateContentConfig(
-                response_modalities=["IMAGE", "TEXT"],  # ✅ Receive both image and text metadata
-                temperature=temperature,
-                image_config=types_new.ImageConfig(
-                    image_size="2K"  # ✅ CRITICAL: Enable 2K resolution (2048px) for high-quality renders
-                ),
-                tools=[
-                    types_new.Tool(googleSearch=types_new.GoogleSearch())  # ✅ Enable Google Search for architectural reference images
+            # ✅ CRITICAL FIX: Sử dụng Dictionary thay vì types.GenerateContentConfig
+            # Điều này giúp tránh lỗi Pydantic "Extra inputs are not permitted" khi thư viện local
+            # chưa cập nhật definition mới nhất của Google nhưng API server đã hỗ trợ.
+            generate_content_config = {
+                "response_modalities": ["IMAGE", "TEXT"],
+                "temperature": temperature,
+                "image_config": {
+                    "image_size": "2K"  # ✅ Force 2K Resolution (2048x2048)
+                },
+                "tools": [
+                    {"googleSearch": {}}  # ✅ Enable Grounding
                 ]
-            )
+            }
             
-            # Stream response to handle chunks
-            text_metadata = []  # ✅ NEW: Collect text metadata from response
+            text_metadata = []
 
+            # Gọi API với config dạng Dictionary
             for chunk in self.client_new.models.generate_content_stream(
                 model=model_name,
                 contents=contents,
-                config=generate_content_config
+                config=generate_content_config 
             ):
-                # Check logic inside the stream
                 if chunk.candidates:
                     candidate = chunk.candidates[0]
-                    # Check validation/safety block here if needed
-
                     if candidate.content and candidate.content.parts:
                         for part in candidate.content.parts:
-                            # ✅ NEW: Capture text metadata
+                            # Capture text metadata
                             if hasattr(part, 'text') and part.text:
                                 text_metadata.append(part.text)
                                 print(f"   📝 Model metadata: {part.text[:100]}...")
 
-                            # ✅ EXISTING: Capture image data
+                            # Capture image data
                             if part.inline_data and part.inline_data.data:
                                 try:
+                                    # Gemini trả về base64 bytes raw, load trực tiếp
                                     generated_image = Image.open(io.BytesIO(part.inline_data.data))
-                                    print(f"   ✅ Image received successfully! (2K resolution)")
+                                    print(f"   ✅ Image received successfully! (2K Resolution)")
                                     if text_metadata:
                                         print(f"   ℹ️  Model description: {' '.join(text_metadata)[:200]}...")
                                     return generated_image
                                 except Exception as e:
                                     print(f"   ⚠️ Failed to decode image bytes: {e}")
 
-            # If loop finishes without returning
-            raise RuntimeError("Gemini API returned no image. Likely blocked by Safety Filters or Prompt format issue.")
+            raise RuntimeError("Gemini API returned no image.")
 
         return self._retry_with_backoff(_generate_img)
 
@@ -220,7 +215,6 @@ class GeminiClient:
     ) -> Optional[Image.Image]:
         """
         Simulate inpainting using Multimodal Prompting.
-        Note: Actual API Inpainting support varies by model version.
         """
         inpaint_prompt = f"""
         TASK: IMAGE EDITING / INPAINTING
@@ -230,11 +224,9 @@ class GeminiClient:
         - Return ONLY the edited image.
         """
         
-        # Depending on how strict the model is, passing reference as a 3rd image or combining logic
-        # Currently passing original + mask as inputs to the model.
         return self.generate_image(
             prompt=inpaint_prompt,
             source_image=original,
-            reference_image=mask, # Passing mask as reference
+            reference_image=mask,
             model_name=Models.FLASH_IMAGE 
         )
