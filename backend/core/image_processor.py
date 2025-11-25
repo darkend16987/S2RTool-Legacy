@@ -124,16 +124,18 @@ class ImageProcessor:
         self,
         pil_image: Image.Image,
         target_aspect_ratio: str = "16:9",
-        sketch_info: Optional[SketchInfo] = None
+        sketch_info: Optional[SketchInfo] = None,
+        preserve_quality: bool = True  # ✅ NEW: Option to preserve maximum quality
     ) -> Image.Image:
         """
         Preprocess sketch for better rendering
-        
+
         Args:
             pil_image: Input sketch
             target_aspect_ratio: Target ratio (e.g., "16:9")
             sketch_info: Pre-computed sketch info (optional)
-        
+            preserve_quality: If True, minimize quality loss (default: True)
+
         Returns:
             Preprocessed PIL Image
         """
@@ -142,56 +144,80 @@ class ImageProcessor:
             target_w, target_h = SUPPORTED_ASPECT_RATIOS[target_aspect_ratio]
         else:
             target_w, target_h = 1920, 1080
-        
+
+        # ✅ OPTIMIZED: If preserve_quality is True and image is already close to target size,
+        # return with minimal processing to avoid quality loss
+        orig_w, orig_h = pil_image.size
+        if preserve_quality:
+            # If image is already within 10% of target dimensions, skip aggressive preprocessing
+            size_ratio = min(orig_w / target_w, orig_h / target_h)
+            if 0.9 <= size_ratio <= 1.1:
+                print(f"   ℹ️  Sketch size optimal ({orig_w}x{orig_h}), skipping aggressive preprocessing")
+                # Just ensure exact dimensions with high-quality resize
+                return pil_image.resize((target_w, target_h), Image.Resampling.LANCZOS)
+
         # Resize maintaining aspect ratio
         img_array = np.array(pil_image)
         h, w = img_array.shape[:2]
-        
+
         # Calculate scale to fit in target dimensions
         scale = min(target_w / w, target_h / h)
         new_w, new_h = int(w * scale), int(h * scale)
-        
-        # Resize
+
+        # ✅ OPTIMIZED: Use high-quality interpolation (LANCZOS4 is best for downscaling)
         if len(img_array.shape) == 3:
             resized = cv2.resize(img_array, (new_w, new_h), interpolation=cv2.INTER_LANCZOS4)
         else:
             resized = cv2.resize(img_array, (new_w, new_h), interpolation=cv2.INTER_LANCZOS4)
-        
-        # Enhance edges if it's a line drawing
-        if sketch_info and sketch_info.sketch_type == 'line_drawing':
+
+        # ✅ OPTIMIZED: Only enhance edges if needed AND quality preservation is disabled
+        # Edge enhancement can introduce artifacts, so skip if preserve_quality=True
+        if not preserve_quality and sketch_info and sketch_info.sketch_type == 'line_drawing':
             resized = self._enhance_edges(resized)
-        
+
         # Pad to exact target size
         if len(resized.shape) == 3:
             padded = np.ones((target_h, target_w, resized.shape[2]), dtype=np.uint8) * 255
         else:
             padded = np.ones((target_h, target_w), dtype=np.uint8) * 255
-        
+
         # Center the image
         y_offset = (target_h - new_h) // 2
         x_offset = (target_w - new_w) // 2
         padded[y_offset:y_offset+new_h, x_offset:x_offset+new_w] = resized
-        
+
         return Image.fromarray(padded)
     
     def _enhance_edges(self, img_array: np.ndarray) -> np.ndarray:
-        """Enhance edges for line drawings"""
+        """
+        ✅ OPTIMIZED: Gently enhance edges for line drawings
+        Uses softer filters to avoid introducing artifacts
+        """
         if len(img_array.shape) == 3:
             gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
         else:
             gray = img_array
-        
-        # Apply bilateral filter to preserve edges
-        filtered = cv2.bilateralFilter(gray, 9, 75, 75)
-        
-        # Enhance contrast
-        enhanced = cv2.equalizeHist(filtered)
-        
+
+        # ✅ OPTIMIZED: Use softer bilateral filter (reduced from 9,75,75 to 5,50,50)
+        # Smaller kernel = less blurring, better detail preservation
+        filtered = cv2.bilateralFilter(gray, 5, 50, 50)
+
+        # ✅ OPTIMIZED: Use CLAHE (Contrast Limited Adaptive Histogram Equalization)
+        # instead of equalizeHist - prevents over-enhancement
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        enhanced = clahe.apply(filtered)
+
+        # ✅ OPTIMIZED: Apply gentle sharpening to recover fine details lost in filtering
+        kernel = np.array([[-0.5, -0.5, -0.5],
+                          [-0.5,  5.0, -0.5],
+                          [-0.5, -0.5, -0.5]])
+        sharpened = cv2.filter2D(enhanced, -1, kernel)
+
         # Convert back to RGB if needed
         if len(img_array.shape) == 3:
-            enhanced = cv2.cvtColor(enhanced, cv2.COLOR_GRAY2RGB)
-        
-        return enhanced
+            sharpened = cv2.cvtColor(sharpened, cv2.COLOR_GRAY2RGB)
+
+        return sharpened
     
     def resize_image(self, pil_image: Image.Image, max_size: int = 1024) -> Image.Image:
         """

@@ -74,9 +74,9 @@ def planning_render():
         if not site_plan_pil or not lot_map_pil:
             return jsonify({"error": "Invalid images"}), 400
 
-        # Resize if needed
-        site_plan_pil = processor.resize_image(site_plan_pil, max_size=1024)
-        lot_map_pil = processor.resize_image(lot_map_pil, max_size=1024)
+        # ✅ OPTIMIZED: Resize to 2048 to preserve maximum detail
+        site_plan_pil = processor.resize_image(site_plan_pil, max_size=2048)
+        lot_map_pil = processor.resize_image(lot_map_pil, max_size=2048)
 
         # Extract parameters
         camera_angle = data.get('camera_angle', 'drone_45deg')
