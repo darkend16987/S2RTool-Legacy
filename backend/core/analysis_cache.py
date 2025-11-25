@@ -10,6 +10,8 @@ from collections import OrderedDict
 from typing import Optional, Dict
 from datetime import datetime, timedelta
 
+from utils.logger import info, debug, warning, error
+
 
 class AnalysisCache:
     """
@@ -73,7 +75,7 @@ class AnalysisCache:
 
         # Check if expired
         if datetime.now() - timestamp > self.ttl:
-            print(f"🗑️  Cache entry expired (age: {datetime.now() - timestamp})")
+            info(f"🗑️  Cache entry expired (age: {datetime.now() - timestamp})")
             del self.cache[key]
             self.misses += 1
             return None
@@ -82,7 +84,7 @@ class AnalysisCache:
         self.cache.move_to_end(key)
 
         self.hits += 1
-        print(f"✅ Cache HIT! (hash: {key[:8]}..., age: {datetime.now() - timestamp})")
+        info(f"✅ Cache HIT! (hash: {key[:8]}..., age: {datetime.now() - timestamp})")
 
         return entry['result']
 
@@ -110,9 +112,9 @@ class AnalysisCache:
         if len(self.cache) > self.maxsize:
             oldest_key = next(iter(self.cache))
             evicted = self.cache.pop(oldest_key)
-            print(f"🗑️  Cache full - evicted oldest entry (age: {datetime.now() - evicted['timestamp']})")
+            info(f"🗑️  Cache full - evicted oldest entry (age: {datetime.now() - evicted['timestamp']})")
 
-        print(f"💾 Cached analysis result (hash: {key[:8]}..., total: {len(self.cache)}/{self.maxsize})")
+        info(f"💾 Cached analysis result (hash: {key[:8]}..., total: {len(self.cache)}/{self.maxsize})")
 
     def clear(self) -> None:
         """Clear all cache entries"""
@@ -157,6 +159,6 @@ class AnalysisCache:
             del self.cache[key]
 
         if expired_keys:
-            print(f"🗑️  Cleaned up {len(expired_keys)} expired cache entries")
+            info(f"🗑️  Cleaned up {len(expired_keys)} expired cache entries")
 
         return len(expired_keys)

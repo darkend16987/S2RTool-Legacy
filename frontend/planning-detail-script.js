@@ -17,7 +17,7 @@ let uploadSketch, previewImage, uploadLabel, generateButton, gallery, aspectRati
 
 // ============== INIT ==============
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Planning Detail Render v3.4 initialized');
+    debugLog('🚀 Planning Detail Render v3.4 initialized');
 
     // 1. Initialize Elements Safely
     uploadSketch = document.getElementById('uploadSketch');
@@ -101,41 +101,17 @@ function applyQualityPreset(level) {
     setCheck('quality_color_correction', preset.color_correction);
     setCheck('quality_desaturate', preset.desaturate);
 
-    console.log(`✅ Applied ${level} quality preset`);
+    debugLog(`✅ Applied ${level} quality preset`);
 }
 
 // ============== IMAGE OPTIMIZATION (Reuse logic) ==============
-async function optimizeImageForUpload(file) {
-    const MAX_DIMENSION = 1024;
-    return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let { width, height } = img;
-            if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-                const ratio = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
-                width = Math.round(width * ratio);
-                height = Math.round(height * ratio);
-            }
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-            ctx.drawImage(img, 0, 0, width, height);
-            canvas.toBlob(resolve, 'image/png');
-        };
-        img.src = URL.createObjectURL(file);
-    });
-}
+// NOTE: optimizeImageForUpload() is now in utils.js (shared utility)
 
-// ============== IMAGE UPLOAD ==============
-async function handleImageUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
 
     try {
-        console.log(`📁 Uploading ${file.name}`);
+        debugLog(`📁 Uploading ${file.name}`);
         const optimizedBlob = await optimizeImageForUpload(file);
 
         const reader = new FileReader();
@@ -151,11 +127,11 @@ async function handleImageUpload(event) {
             // Enable Generate button immediately if user skips analyze (optional)
             if (generateButton) generateButton.disabled = false;
 
-            console.log('✅ Image uploaded successfully');
+            debugLog('✅ Image uploaded successfully');
         };
         reader.readAsDataURL(optimizedBlob);
     } catch (error) {
-        console.error('❌ Image upload failed:', error);
+        errorLog('❌ Image upload failed:', error);
         showError('renderError', 'Lỗi khi tải ảnh: ' + error.message);
     }
 }
@@ -303,7 +279,7 @@ async function generateRender() {
     hideSuccess('renderSuccess');
 
     try {
-        console.log('🎨 Generating planning detail render...');
+        debugLog('🎨 Generating planning detail render...');
         const formData = collectFormData();
 
         const requestData = {
@@ -334,7 +310,7 @@ async function generateRender() {
         if (statsBox) statsBox.classList.remove('hidden');
 
     } catch (error) {
-        console.error('❌ Render failed:', error);
+        errorLog('❌ Render failed:', error);
         showError('renderError', 'Lỗi khi render: ' + error.message);
     } finally {
         isRendering = false;
@@ -371,21 +347,5 @@ function handleDownloadImage() {
 // ============== HELPERS ==============
 function showError(id, msg) {
     const el = document.getElementById(id);
-    if (el) { el.textContent = msg; el.classList.remove('hidden'); }
-}
-function hideError(id) {
-    const el = document.getElementById(id);
-    if (el) el.classList.add('hidden');
-}
-function showSuccess(id, msg) {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = msg; el.classList.remove('hidden'); setTimeout(() => el.classList.add('hidden'), 4000); }
-}
-function hideSuccess(id) {
-    const el = document.getElementById(id);
-    if (el) el.classList.add('hidden');
-}
-function showSpinner(id, show) {
-    const el = document.getElementById(id);
-    if (el) el.classList.toggle('hidden', !show);
-}
+// ============== UTILITY FUNCTIONS ==============
+// NOTE: showError, hideError, showSuccess, hideSuccess are now in utils.js (shared utilities)

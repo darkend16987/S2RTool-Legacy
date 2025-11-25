@@ -18,7 +18,7 @@ let sitePlanInput, lotMapInput, addLotBtn, generateBtn, regenerateBtn, gallery, 
 
 // ============== INIT ==============
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Planning Mode initialized');
+    debugLog('🚀 Planning Mode initialized');
 
     // 1. Initialize Elements
     sitePlanInput = document.getElementById('uploadSitePlan');
@@ -48,39 +48,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    console.log('✅ Planning Mode setup complete');
+    debugLog('✅ Planning Mode setup complete');
 });
 
 // ============== IMAGE OPTIMIZATION ==============
-async function optimizeImageForUpload(file) {
-    const MAX_DIMENSION = 1024;
-
-    return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let { width, height } = img;
-
-            if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-                const ratio = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
-                width = Math.round(width * ratio);
-                height = Math.round(height * ratio);
-                console.log(`📐 Resizing image: ${img.width}×${img.height} → ${width}×${height}`);
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-
-            const ctx = canvas.getContext('2d');
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-            ctx.drawImage(img, 0, 0, width, height);
-
-            canvas.toBlob(resolve, 'image/png');
-        };
-        img.src = URL.createObjectURL(file);
-    });
-}
+// NOTE: optimizeImageForUpload() is now in utils.js (shared utility)
 
 // ============== PLANNING MODE HANDLERS ==============
 
@@ -89,7 +61,7 @@ async function handleSitePlanUpload(event) {
     if (!file) return;
 
     try {
-        console.log('📤 Processing site plan upload...');
+        debugLog('📤 Processing site plan upload...');
         const optimizedBlob = await optimizeImageForUpload(file);
 
         const reader = new FileReader();
@@ -106,12 +78,12 @@ async function handleSitePlanUpload(event) {
             }
 
             updateGenerateButton();
-            console.log('✅ Site plan uploaded');
+            debugLog('✅ Site plan uploaded');
         };
         reader.readAsDataURL(optimizedBlob);
 
     } catch (error) {
-        console.error('❌ Site plan upload failed:', error);
+        errorLog('❌ Site plan upload failed:', error);
         showError('planningError', 'Lỗi tải site plan. Vui lòng thử lại.');
     }
 }
@@ -121,7 +93,7 @@ async function handleLotMapUpload(event) {
     if (!file) return;
 
     try {
-        console.log('📤 Processing lot map upload...');
+        debugLog('📤 Processing lot map upload...');
         const optimizedBlob = await optimizeImageForUpload(file);
 
         const reader = new FileReader();
@@ -140,12 +112,12 @@ async function handleLotMapUpload(event) {
             if (addLotBtn) addLotBtn.disabled = false;
 
             updateGenerateButton();
-            console.log('✅ Lot map uploaded');
+            debugLog('✅ Lot map uploaded');
         };
         reader.readAsDataURL(optimizedBlob);
 
     } catch (error) {
-        console.error('❌ Lot map upload failed:', error);
+        errorLog('❌ Lot map upload failed:', error);
         showError('planningError', 'Lỗi tải lot map. Vui lòng thử lại.');
     }
 }
@@ -265,7 +237,7 @@ async function generatePlanningRender() {
     hideSuccess('planningSuccess');
 
     try {
-        console.log('🎨 Generating planning render...');
+        debugLog('🎨 Generating planning render...');
 
         const getVal = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
 
@@ -295,7 +267,7 @@ async function generatePlanningRender() {
         showSuccess('planningSuccess', '🎉 Planning render hoàn tất!');
 
     } catch (error) {
-        console.error('❌ Planning render failed:', error);
+        errorLog('❌ Planning render failed:', error);
         showError('planningError', `Lỗi render: ${error.message}`);
     } finally {
         if (generateBtn) {
@@ -345,25 +317,10 @@ function downloadPlanningImage(base64Data) {
         showSuccess('planningSuccess', '✅ Ảnh đã được tải xuống!');
 
     } catch (error) {
-        console.error('❌ Download failed:', error);
+        errorLog('❌ Download failed:', error);
         showError('planningError', 'Lỗi khi tải ảnh.');
     }
 }
 
-// UI Helpers
-function showError(id, message) {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = message; el.classList.remove('hidden'); }
-}
-function hideError(id) {
-    const el = document.getElementById(id);
-    if (el) el.classList.add('hidden');
-}
-function showSuccess(id, message) {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = message; el.classList.remove('hidden'); setTimeout(() => el.classList.add('hidden'), 4000); }
-}
-function hideSuccess(id) {
-    const el = document.getElementById(id);
-    if (el) el.classList.add('hidden');
-}
+// ============== UTILITY FUNCTIONS ==============
+// NOTE: showError, hideError, showSuccess, hideSuccess are now in utils.js (shared utilities)
