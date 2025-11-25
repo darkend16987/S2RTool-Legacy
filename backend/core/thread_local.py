@@ -8,6 +8,8 @@ to prevent race conditions when handling concurrent requests.
 from threading import local
 from typing import Optional
 
+from utils.logger import info, debug, warning, error
+
 # Thread-local storage
 _thread_locals = local()
 

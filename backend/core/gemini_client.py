@@ -14,6 +14,8 @@ import urllib.error
 from typing import List, Optional, Union, Dict
 from PIL import Image
 
+from utils.logger import info, debug, warning, error
+
 # OLD API for text/JSON generation (Stable for text)
 import google.generativeai as genai_old
 from google.generativeai import types as types_old
@@ -80,7 +82,7 @@ class GeminiClient:
                     raise e
 
                 backoff_time = 2 ** attempt
-                print(f"⚠️  Gemini API error (attempt {attempt + 1}/{self.max_retries}): {e}")
+                warning(f"⚠️  Gemini API error (attempt {attempt + 1}/{self.max_retries}): {e}")
                 time.sleep(backoff_time)
 
         raise last_exception
@@ -121,7 +123,7 @@ class GeminiClient:
             try:
                 return json.loads(response_text)
             except json.JSONDecodeError as e:
-                print(f"❌ JSON Parse Error. Raw text: {response_text[:100]}...")
+                error(f"❌ JSON Parse Error. Raw text: {response_text[:100]}...")
                 raise ValueError(f"Invalid JSON from Gemini: {str(e)}")
 
         return self._retry_with_backoff(_generate)
@@ -197,7 +199,7 @@ class GeminiClient:
             error_str = str(e).lower()
             # Bắt lỗi "Extra inputs forbidden" hoặc lỗi Validation liên quan đến image_size
             if ("validation error" in error_str and "extra" in error_str) or ("image_size" in error_str):
-                print(f"⚠️  Local SDK Validation Failed (likely old version).")
+                warning(f"⚠️  Local SDK Validation Failed (likely old version).")
                 print(f"🔄 Switching to Raw REST API Fallback to force 2K render...")
                 return self._generate_image_raw_rest(prompt, source_image, reference_image, model_name, temperature)
             else:
@@ -294,10 +296,10 @@ class GeminiClient:
 
         except urllib.error.HTTPError as e:
             error_body = e.read().decode('utf-8')
-            print(f"❌ Raw API HTTP Error: {e.code} - {error_body}")
+            error(f"❌ Raw API HTTP Error: {e.code} - {error_body}")
             raise RuntimeError(f"Gemini API Error: {error_body}")
         except Exception as e:
-            print(f"❌ Raw API Error: {str(e)}")
+            error(f"❌ Raw API Error: {str(e)}")
             raise e
 
     def generate_with_inpaint(

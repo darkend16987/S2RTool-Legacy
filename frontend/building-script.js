@@ -1,7 +1,9 @@
 // ============================================
 // ARCHITECTURE S2R TOOL - Frontend JavaScript
-// Version: 3.4 - FULL ROBUST VERSION
+// Version: 3.5 - Refactored with shared utils.js
 // Updated: Docker Compatible & Safe DOM
+// NOTE: Shared utilities (optimizeImageForUpload, showError, etc.)
+//       are now in utils.js to avoid code duplication
 // ============================================
 
 // ============== CONFIG ==============
@@ -29,7 +31,7 @@ let gallery, aspectRatioSelect, viewpointSelect;
 
 // ============== INIT ==============
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 S2R Tool v3.4 initialized');
+    debugLog('🚀 S2R Tool v3.5 initialized');
 
     // 1. Khởi tạo các DOM Elements an toàn
     uploadSketch = document.getElementById('uploadSketch');
@@ -175,35 +177,7 @@ function setupEnvironmentDropdowns() {
 }
 
 // ============== IMAGE OPTIMIZATION ==============
-async function optimizeImageForUpload(file) {
-    const MAX_DIMENSION = 1024; // Match backend resize limit
-
-    return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let { width, height } = img;
-
-            if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-                const ratio = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height);
-                width = Math.round(width * ratio);
-                height = Math.round(height * ratio);
-                console.log(`📐 Resizing image: ${img.width}×${img.height} → ${width}×${height}`);
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-
-            const ctx = canvas.getContext('2d');
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-            ctx.drawImage(img, 0, 0, width, height);
-
-            canvas.toBlob(resolve, 'image/png');
-        };
-        img.src = URL.createObjectURL(file);
-    });
-}
+// NOTE: optimizeImageForUpload() is now in utils.js (shared utility)
 
 // ============== IMAGE UPLOAD ==============
 async function handleImageUpload(event) {
@@ -211,7 +185,7 @@ async function handleImageUpload(event) {
     if (!file) return;
 
     try {
-        console.log(`📤 Processing upload: ${file.name}`);
+        debugLog(`📤 Processing upload: ${file.name}`);
         const optimizedBlob = await optimizeImageForUpload(file);
 
         const reader = new FileReader();
@@ -231,12 +205,12 @@ async function handleImageUpload(event) {
                 analyzeButton.disabled = false;
             }
 
-            console.log('✅ Image ready for analysis');
+            debugLog('✅ Image ready for analysis');
         };
         reader.readAsDataURL(optimizedBlob);
 
     } catch (error) {
-        console.error('❌ Image optimization failed:', error);
+        errorLog('❌ Image optimization failed:', error);
         showError('analyzeError', 'Lỗi xử lý ảnh. Vui lòng thử lại.');
     }
 }
@@ -260,7 +234,7 @@ async function analyzeSketch() {
     hideSuccess('analyzeSuccess');
 
     try {
-        console.log('📊 Analyzing sketch...');
+        debugLog('📊 Analyzing sketch...');
 
         const response = await fetch(`${API_BASE_URL}/analyze-sketch`, {
             method: 'POST',
@@ -280,7 +254,7 @@ async function analyzeSketch() {
         }
 
         currentAnalysisData = await response.json();
-        console.log('✅ Analysis complete:', currentAnalysisData);
+        debugLog('✅ Analysis complete:', currentAnalysisData);
 
         fillFormFromAnalysis(currentAnalysisData);
         await translatePrompt();
@@ -370,7 +344,7 @@ async function translatePrompt() {
     const formData = collectFormData();
 
     try {
-        console.log('🌐 Translating to English...');
+        debugLog('🌐 Translating to English...');
 
         const response = await fetch(`${API_BASE_URL}/translate-prompt`, {
             method: 'POST',
@@ -384,7 +358,7 @@ async function translatePrompt() {
 
         const result = await response.json();
         currentTranslatedData = result.translated_data_en;
-        console.log('✅ Translation complete');
+        debugLog('✅ Translation complete');
 
         if (generateButton) generateButton.disabled = false;
 
@@ -479,7 +453,7 @@ async function generateRender() {
     hideSuccess('renderSuccess');
 
     try {
-        console.log('🎨 Generating render...');
+        debugLog('🎨 Generating render...');
         const form_data_vi = collectFormData();
 
         const requestData = {
@@ -491,7 +465,7 @@ async function generateRender() {
 
         if (currentReferenceImage) {
             requestData.reference_image_base64 = currentReferenceImage;
-            console.log('📎 Using reference image');
+            debugLog('📎 Using reference image');
         }
 
         const response = await fetch(`${API_BASE_URL}/render`, {
@@ -574,7 +548,7 @@ function handleDownloadImage() {
 
 // ============== DYNAMIC ITEMS ==============
 function setupDynamicContainers() {
-    console.log('🔧 Dynamic containers ready');
+    debugLog('🔧 Dynamic containers ready');
 }
 
 function addDynamicItem(container, type, typeValue = '', descriptionValue = '') {
@@ -676,7 +650,7 @@ async function openReferenceLibrary() {
 
 function showCategoryPicker(categories) {
     // Logic hiển thị modal chọn danh mục (Giả lập)
-    console.log('Open category picker:', categories);
+    debugLog('Open category picker:', categories);
     // Trong thực tế, bạn sẽ tạo modal HTML ở đây giống như bản gốc
 }
 
@@ -815,19 +789,6 @@ function showSpinner(id, show) {
     const spinner = document.getElementById(id);
     if (spinner) spinner.classList.toggle('hidden', !show);
 }
-function showError(id, message) {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = message; el.classList.remove('hidden'); }
-}
-function hideError(id) {
-    const el = document.getElementById(id);
-    if (el) el.classList.add('hidden');
-}
-function showSuccess(id, message) {
-    const el = document.getElementById(id);
-    if (el) { el.textContent = message; el.classList.remove('hidden'); setTimeout(() => el.classList.add('hidden'), 4000); }
-}
-function hideSuccess(id) {
-    const el = document.getElementById(id);
-    if (el) el.classList.add('hidden');
-}
+
+// ============== UTILITY FUNCTIONS ==============
+// NOTE: showError, hideError, showSuccess, hideSuccess are now in utils.js (shared utilities)

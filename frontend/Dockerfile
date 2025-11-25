@@ -8,6 +8,7 @@ COPY planning-render.html /usr/share/nginx/html/
 COPY planning-detail-render.html /usr/share/nginx/html/
 COPY settings.html /usr/share/nginx/html/
 COPY style.css /usr/share/nginx/html/
+COPY utils.js /usr/share/nginx/html/
 COPY script.js /usr/share/nginx/html/
 COPY building-script.js /usr/share/nginx/html/
 COPY planning-script.js /usr/share/nginx/html/
