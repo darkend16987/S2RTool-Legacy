@@ -159,15 +159,25 @@ class GeminiClient:
                 parts.append(types_new.Part.from_bytes(data=img_byte_arr.getvalue(), mime_type="image/png"))
             
             parts.append(types_new.Part.from_text(text=prompt))
-            
+
             contents = [types_new.Content(role="user", parts=parts)]
-            
+
+            # ✅ OPTIMIZED: Configure for maximum image quality (2K resolution)
+            # Based on AI Studio reference code for gemini-3-pro-image-preview
             generate_content_config = types_new.GenerateContentConfig(
-                response_modalities=["IMAGE"],
-                temperature=temperature
+                response_modalities=["IMAGE", "TEXT"],  # ✅ Receive both image and text metadata
+                temperature=temperature,
+                image_config=types_new.ImageConfig(
+                    image_size="2K"  # ✅ CRITICAL: Enable 2K resolution (2048px) for high-quality renders
+                ),
+                tools=[
+                    types_new.Tool(googleSearch=types_new.GoogleSearch())  # ✅ Enable Google Search for architectural reference images
+                ]
             )
             
             # Stream response to handle chunks
+            text_metadata = []  # ✅ NEW: Collect text metadata from response
+
             for chunk in self.client_new.models.generate_content_stream(
                 model=model_name,
                 contents=contents,
@@ -177,17 +187,25 @@ class GeminiClient:
                 if chunk.candidates:
                     candidate = chunk.candidates[0]
                     # Check validation/safety block here if needed
-                    
+
                     if candidate.content and candidate.content.parts:
                         for part in candidate.content.parts:
+                            # ✅ NEW: Capture text metadata
+                            if hasattr(part, 'text') and part.text:
+                                text_metadata.append(part.text)
+                                print(f"   📝 Model metadata: {part.text[:100]}...")
+
+                            # ✅ EXISTING: Capture image data
                             if part.inline_data and part.inline_data.data:
                                 try:
                                     generated_image = Image.open(io.BytesIO(part.inline_data.data))
-                                    print(f"   ✅ Image received successfully!")
+                                    print(f"   ✅ Image received successfully! (2K resolution)")
+                                    if text_metadata:
+                                        print(f"   ℹ️  Model description: {' '.join(text_metadata)[:200]}...")
                                     return generated_image
                                 except Exception as e:
                                     print(f"   ⚠️ Failed to decode image bytes: {e}")
-            
+
             # If loop finishes without returning
             raise RuntimeError("Gemini API returned no image. Likely blocked by Safety Filters or Prompt format issue.")
 

@@ -63,10 +63,12 @@ def render_image():
         
         # Detect and preprocess
         sketch_info = processor.detect_sketch_type(sketch_pil)
+        # ✅ OPTIMIZED: Use preserve_quality=True to minimize quality loss
         preprocessed = processor.preprocess_sketch(
             sketch_pil,
             target_aspect_ratio=data['aspect_ratio'],
-            sketch_info=sketch_info
+            sketch_info=sketch_info,
+            preserve_quality=True  # ✅ NEW: Preserve maximum quality
         )
         
         # Process reference image (optional)

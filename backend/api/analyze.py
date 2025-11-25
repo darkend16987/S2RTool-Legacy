@@ -56,8 +56,9 @@ def analyze_sketch():
         # Detect sketch type
         sketch_info = processor.detect_sketch_type(pil_image)
 
-        # Resize if needed
-        pil_image = processor.resize_image(pil_image, max_size=1024)
+        # ✅ OPTIMIZED: Resize to 2048 to preserve maximum detail for analysis
+        # Previously was 1024 which lost too much detail
+        pil_image = processor.resize_image(pil_image, max_size=2048)
 
         # ✅ NEW: Convert image to bytes for cache lookup
         img_byte_arr = io.BytesIO()
