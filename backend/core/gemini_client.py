@@ -1,14 +1,16 @@
 """
 core/gemini_client.py - Gemini API Client Wrapper
 Uses BOTH old (generativeai) and new (genai) APIs
-✅ FIX: Chuyển Config sang Dictionary để fix lỗi "Extra inputs forbidden"
-✅ FIX: Hỗ trợ render ảnh 2K (2048x2048)
+✅ FIX: Chuyển 'tools' ra khỏi 'generationConfig' trong Raw REST Payload
+✅ FIX: Hỗ trợ render ảnh 2K chuẩn xác
 """
 
 import json
 import re
 import io
 import time
+import urllib.request
+import urllib.error
 from typing import List, Optional, Union, Dict
 from PIL import Image
 
@@ -70,6 +72,10 @@ class GeminiClient:
                     'temporarily unavailable', '429', '500', '503'
                 ])
 
+                # Check for Pydantic Validation Error (Not retryable via same method, but handled by caller)
+                if "validation error" in error_msg and "extra inputs" in error_msg:
+                    raise e 
+
                 if not is_retryable or attempt == self.max_retries - 1:
                     raise e
 
@@ -92,7 +98,6 @@ class GeminiClient:
             model = genai_old.GenerativeModel(model_name)
             parts = prompt_parts if isinstance(prompt_parts, list) else [prompt_parts]
 
-            # Using response_mime_type="application/json" forces Gemini to output valid JSON
             response = model.generate_content(
                 parts,
                 generation_config=types_old.GenerationConfig(
@@ -130,7 +135,8 @@ class GeminiClient:
         temperature: float = Defaults.TEMPERATURE_GENERATION
     ) -> Image.Image:
         """
-        Generate image using NEW API (google-genai)
+        Generate image using NEW API (google-genai).
+        Falls back to Raw REST API if local library validation fails (e.g. 2K issue).
         """
         if not HAS_NEW_API:
             raise ImportError("Library 'google-genai' not installed. Add to requirements.txt")
@@ -138,44 +144,35 @@ class GeminiClient:
         if not self.client_new:
             raise ValueError("Gemini Client (New API) not initialized.")
 
-        def _generate_img():
-            print(f"🎨 Generating image with {model_name}...")
-            
+        # 1. Định nghĩa hàm gọi SDK chuẩn
+        def _generate_img_sdk():
+            print(f"🎨 Generating image with {model_name} (SDK Mode)...")
             parts = []
             
-            # Handle Source Image
             if source_image:
                 img_byte_arr = io.BytesIO()
                 source_image.save(img_byte_arr, format='PNG')
                 parts.append(types_new.Part.from_bytes(data=img_byte_arr.getvalue(), mime_type="image/png"))
             
-            # Handle Reference Image
             if reference_image:
                 img_byte_arr = io.BytesIO()
                 reference_image.save(img_byte_arr, format='PNG')
                 parts.append(types_new.Part.from_bytes(data=img_byte_arr.getvalue(), mime_type="image/png"))
             
             parts.append(types_new.Part.from_text(text=prompt))
-
             contents = [types_new.Content(role="user", parts=parts)]
 
-            # ✅ CRITICAL FIX: Sử dụng Dictionary thay vì types.GenerateContentConfig
-            # Điều này giúp tránh lỗi Pydantic "Extra inputs are not permitted" khi thư viện local
-            # chưa cập nhật definition mới nhất của Google nhưng API server đã hỗ trợ.
+            # Config dictionary cho SDK
             generate_content_config = {
                 "response_modalities": ["IMAGE", "TEXT"],
                 "temperature": temperature,
                 "image_config": {
-                    "image_size": "2K"  # ✅ Force 2K Resolution (2048x2048)
+                    "image_size": "2K"
                 },
-                "tools": [
-                    {"googleSearch": {}}  # ✅ Enable Grounding
-                ]
+                "tools": [{"googleSearch": {}}]
             }
             
             text_metadata = []
-
-            # Gọi API với config dạng Dictionary
             for chunk in self.client_new.models.generate_content_stream(
                 model=model_name,
                 contents=contents,
@@ -185,26 +182,123 @@ class GeminiClient:
                     candidate = chunk.candidates[0]
                     if candidate.content and candidate.content.parts:
                         for part in candidate.content.parts:
-                            # Capture text metadata
                             if hasattr(part, 'text') and part.text:
                                 text_metadata.append(part.text)
-                                print(f"   📝 Model metadata: {part.text[:100]}...")
-
-                            # Capture image data
                             if part.inline_data and part.inline_data.data:
-                                try:
-                                    # Gemini trả về base64 bytes raw, load trực tiếp
-                                    generated_image = Image.open(io.BytesIO(part.inline_data.data))
-                                    print(f"   ✅ Image received successfully! (2K Resolution)")
-                                    if text_metadata:
-                                        print(f"   ℹ️  Model description: {' '.join(text_metadata)[:200]}...")
-                                    return generated_image
-                                except Exception as e:
-                                    print(f"   ⚠️ Failed to decode image bytes: {e}")
+                                print(f"   ✅ Image received (SDK)!")
+                                return Image.open(io.BytesIO(part.inline_data.data))
 
             raise RuntimeError("Gemini API returned no image.")
 
-        return self._retry_with_backoff(_generate_img)
+        # 2. Thử gọi SDK, nếu lỗi Validation -> Gọi Fallback
+        try:
+            return self._retry_with_backoff(_generate_img_sdk)
+        except Exception as e:
+            error_str = str(e).lower()
+            # Bắt lỗi "Extra inputs forbidden" hoặc lỗi Validation liên quan đến image_size
+            if ("validation error" in error_str and "extra" in error_str) or ("image_size" in error_str):
+                print(f"⚠️  Local SDK Validation Failed (likely old version).")
+                print(f"🔄 Switching to Raw REST API Fallback to force 2K render...")
+                return self._generate_image_raw_rest(prompt, source_image, reference_image, model_name, temperature)
+            else:
+                raise e
+
+    def _generate_image_raw_rest(
+        self,
+        prompt: str,
+        source_image: Optional[Image.Image],
+        reference_image: Optional[Image.Image],
+        model_name: str,
+        temperature: float
+    ) -> Image.Image:
+        """
+        Fallback method: Manually constructs HTTP request to bypass strict SDK validation.
+        This guarantees 'imageSize': '2K' is sent to the server.
+        """
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={self.api_key}"
+        
+        # Prepare Parts
+        parts = []
+        
+        # Helper to convert image to base64 part
+        def img_to_part(img):
+            buf = io.BytesIO()
+            img.save(buf, format='PNG')
+            b64_data = io.BytesIO(buf.getvalue()).read()
+            # Standard base64 encoding for JSON payload
+            import base64
+            return {
+                "inlineData": {
+                    "mimeType": "image/png",
+                    "data": base64.b64encode(b64_data).decode('utf-8')
+                }
+            }
+
+        if source_image:
+            parts.append(img_to_part(source_image))
+        
+        if reference_image:
+            parts.append(img_to_part(reference_image))
+            
+        parts.append({"text": prompt})
+
+        # Construct Payload (Note: CamelCase for JSON API)
+        payload = {
+            "contents": [{
+                "role": "user",
+                "parts": parts
+            }],
+            "generationConfig": {
+                "responseModalities": ["IMAGE", "TEXT"],
+                "temperature": temperature,
+                "imageConfig": {
+                    "imageSize": "2K"
+                }
+                # ❌ tools KHÔNG được nằm ở đây trong REST API
+            },
+            "tools": [{"googleSearch": {}}] # ✅ tools phải nằm ở root level
+        }
+
+        # Send Request
+        try:
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode('utf-8'),
+                headers={'Content-Type': 'application/json'}
+            )
+            
+            with urllib.request.urlopen(req) as response:
+                result = json.loads(response.read().decode('utf-8'))
+                
+            # Parse Response
+            # Look for inlineData in candidates
+            candidates = result.get('candidates', [])
+            if not candidates:
+                raise RuntimeError("Raw API returned no candidates.")
+            
+            content = candidates[0].get('content', {})
+            parts_resp = content.get('parts', [])
+            
+            for part in parts_resp:
+                if 'inlineData' in part:
+                    b64_resp = part['inlineData']['data']
+                    import base64
+                    img_data = base64.b64decode(b64_resp)
+                    print(f"   ✅ Image received (Raw REST Fallback) - 2K Success!")
+                    return Image.open(io.BytesIO(img_data))
+                
+                if 'text' in part:
+                    print(f"   📝 Metadata: {part['text'][:50]}...")
+
+            raise RuntimeError("Raw API returned no image data.")
+
+        except urllib.error.HTTPError as e:
+            error_body = e.read().decode('utf-8')
+            print(f"❌ Raw API HTTP Error: {e.code} - {error_body}")
+            raise RuntimeError(f"Gemini API Error: {error_body}")
+        except Exception as e:
+            print(f"❌ Raw API Error: {str(e)}")
+            raise e
 
     def generate_with_inpaint(
         self,
