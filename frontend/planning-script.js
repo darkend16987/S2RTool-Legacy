@@ -287,6 +287,8 @@ function displayPlanningRender(base64Data, mimeType) {
     img.alt = 'Planning render result';
     img.style.width = '100%';
     img.style.borderRadius = '12px';
+    img.style.cursor = 'zoom-in';
+    img.addEventListener('click', () => openImagePreview(img.src, 'Planning Render Result'));
     gallery.appendChild(img);
 
     // Hiển thị nút download và controls
