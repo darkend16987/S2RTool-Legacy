@@ -107,6 +107,7 @@ function applyQualityPreset(level) {
 // ============== IMAGE OPTIMIZATION (Reuse logic) ==============
 // NOTE: optimizeImageForUpload() is now in utils.js (shared utility)
 
+async function handleImageUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -327,6 +328,8 @@ function displayRenderedImage(base64Image) {
     img.src = base64Image;
     img.style.width = '100%';
     img.style.borderRadius = '12px';
+    img.style.cursor = 'zoom-in';
+    img.addEventListener('click', () => openImagePreview(img.src, 'Planning Detail Render Result'));
     gallery.appendChild(img);
 
     const controls = document.getElementById('outputControls');
@@ -344,8 +347,5 @@ function handleDownloadImage() {
     link.click();
 }
 
-// ============== HELPERS ==============
-function showError(id, msg) {
-    const el = document.getElementById(id);
 // ============== UTILITY FUNCTIONS ==============
 // NOTE: showError, hideError, showSuccess, hideSuccess are now in utils.js (shared utilities)

@@ -346,6 +346,71 @@ function downloadBase64Image(base64Data, filename = 'image.png') {
     }
 }
 
+// ============== IMAGE PREVIEW UTILITIES ==============
+
+/**
+ * Initialize image preview modal
+ */
+function initImagePreviewModal() {
+    if (document.getElementById('imagePreviewModal')) return;
+
+    const modal = document.createElement('div');
+    modal.id = 'imagePreviewModal';
+    modal.className = 'image-preview-modal';
+    modal.innerHTML = `
+        <div class="image-preview-content">
+            <button class="image-preview-close">&times;</button>
+            <img class="image-preview-img" src="" alt="Preview">
+            <div class="image-preview-caption"></div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const closeBtn = modal.querySelector('.image-preview-close');
+    const img = modal.querySelector('.image-preview-img');
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        setTimeout(() => {
+            img.src = '';
+        }, 300);
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+}
+
+/**
+ * Open image in preview modal
+ * @param {string} src - Image source URL
+ * @param {string} caption - Optional caption
+ */
+function openImagePreview(src, caption = '') {
+    initImagePreviewModal();
+
+    const modal = document.getElementById('imagePreviewModal');
+    const img = modal.querySelector('.image-preview-img');
+    const captionEl = modal.querySelector('.image-preview-caption');
+
+    img.src = src;
+    captionEl.textContent = caption;
+
+    // Small delay to allow transition
+    requestAnimationFrame(() => {
+        modal.classList.add('active');
+    });
+}
+
 // ============== EXPORTS (for ES6 modules, if needed) ==============
 // If using ES6 modules, uncomment below:
 // export {
@@ -357,5 +422,6 @@ function downloadBase64Image(base64Data, filename = 'image.png') {
 //     getApiBaseUrl, apiRequest,
 //     validateImageFile,
 //     getElement, setElementVisibility,
-//     downloadBase64Image
+//     downloadBase64Image,
+//     openImagePreview
 // };
