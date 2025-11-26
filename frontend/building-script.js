@@ -489,35 +489,6 @@ async function generateRender() {
         showError('renderError', `Lỗi render: ${error.message}`);
     } finally {
         showSpinner('renderSpinner', false);
-        if (generateButton) generateButton.disabled = false;
-        isRendering = false;
-    }
-}
-
-// ============== DISPLAY RENDERED IMAGE ==============
-function displayRenderedImage(base64Data, mimeType) {
-    if (!gallery) return;
-
-    gallery.innerHTML = '';
-
-    const img = document.createElement('img');
-    img.src = `data:${mimeType};base64,${base64Data}`;
-    img.alt = 'Rendered result';
-    img.style.width = '100%';
-    img.style.height = '100%';
-    img.style.objectFit = 'contain';
-
-    gallery.appendChild(img);
-
-    const controls = document.getElementById('outputControls');
-    if (controls) controls.classList.remove('hidden');
-
-    addUseAsReferenceButton();
-}
-
-// DOWNLOAD HANDLER
-function handleDownloadImage() {
-    if (!currentRenderedImage) {
         showError('renderError', 'Chưa có ảnh!');
         return;
     }

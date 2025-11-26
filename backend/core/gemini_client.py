@@ -312,13 +312,9 @@ class GeminiClient:
         """
         Simulate inpainting using Multimodal Prompting.
         """
-        inpaint_prompt = f"""
-        TASK: IMAGE EDITING / INPAINTING
-        - Input 1: Original Image
-        - Input 2: Mask (White = Edit, Black = Keep)
-        - Instruction: {prompt}
-        - Return ONLY the edited image.
-        """
+        # ✅ FIX: Pass prompt directly (PromptBuilder already structures it perfectly)
+        # No need to double-wrap with "TASK: ..."
+        inpaint_prompt = prompt
         
         return self.generate_image(
             prompt=inpaint_prompt,
