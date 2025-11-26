@@ -479,7 +479,28 @@ async function generateRender() {
             throw new Error(errorData.error || 'Render failed');
         }
 
-        const result = await response.json();
+        // ✅ FIX: Add explicit error handling for JSON parsing
+        let result;
+        try {
+            result = await response.json();
+        } catch (jsonError) {
+            console.error('❌ JSON parsing failed:', jsonError);
+            console.error('Response size:', response.headers.get('content-length'));
+            throw new Error(`Failed to parse response: ${jsonError.message}`);
+        }
+
+        // ✅ DEBUG: Log response structure
+        debugLog('📦 Render response received:', {
+            hasImage: !!result.generated_image_base64,
+            imageSize: result.generated_image_base64 ? result.generated_image_base64.length : 0,
+            mimeType: result.mime_type
+        });
+
+        // ✅ VALIDATE: Check if image data exists
+        if (!result.generated_image_base64) {
+            throw new Error('Backend returned empty image data');
+        }
+
         currentRenderedImage = result.generated_image_base64;
         displayRenderedImage(result.generated_image_base64, result.mime_type);
         showSuccess('renderSuccess', '🎉 Render hoàn tất!');
